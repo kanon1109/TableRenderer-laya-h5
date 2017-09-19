@@ -192,7 +192,10 @@ public class ScorllContainer extends Sprite
 		}
 		else
 		{
-			
+			if (this.content.x > 0)
+				this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
+			else if (this.content.x < this.viewWidth - this.content.width)
+				this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
 		}
 	}
 	
@@ -227,8 +230,7 @@ public class ScorllContainer extends Sprite
 	private function contentMouseDownHandler():void 
 	{
 		this.isTouched = true;
-		if (this.tween) 
-			this.tween.clear();
+		if (this.tween) this.tween.clear();
 		this.touchPos.x = MouseManager.instance.mouseX;
 		this.touchPos.y = MouseManager.instance.mouseY;
 		this.contentPos.x = this.content.x;
@@ -256,7 +258,12 @@ public class ScorllContainer extends Sprite
 			}
 			else
 			{
-				
+				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x) / 1.5;
+				if (!this.isBounce)
+				{
+					if (this.content.x > 0) this.content.x = 0;
+					else if (this.content.x < this.viewWidth - this.content.width) this.content.x = this.viewWidth - this.content.width;
+				}
 			}
 		}
 	}

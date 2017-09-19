@@ -15,15 +15,13 @@ import components.ScorllContainer;
  */
 public class Test 
 {
-	private var touchY:Number;
-	private var timer:Timer;
 	private var scroll:ScorllContainer;
 	public function Test() 
 	{
 		Laya.init(1136, 640);
 		
 		this.scroll = new ScorllContainer();
-		this.scroll.setViewSize(200, 500);
+		this.scroll.setViewSize(500, 500);
 		this.scroll.gap = 10;
 		Laya.stage.addChild(this.scroll);
 		
@@ -42,7 +40,7 @@ public class Test
 			var img:Image = new Image("res/bg.png");
 			this.scroll.addNode(img);
 		}
-		this.timer = new Timer();
+		this.scroll.isHorizontal = true;
 		Laya.stage.on(Event.CLICK, this, clickHandler);
 	}
 	
@@ -54,23 +52,6 @@ public class Test
 		//this.scroll.removeAllChild();
 		//this.scroll.setViewSize(500, 200);
 		//this.scroll.isHorizontal = true;
-	}
-	
-	private function loopHandler():void 
-	{
-		var y:Number = MouseManager.instance.mouseY - this.touchY;
-	}
-	
-	private function contentMouseUp():void 
-	{
-		this.timer.clear(this, loopHandler);
-	}
-	
-	private function contentMouseDown():void 
-	{
-		trace("touch");
-		this.timer.frameLoop(1, this, loopHandler);
-		this.touchY = MouseManager.instance.mouseY;
 	}
 }
 }
