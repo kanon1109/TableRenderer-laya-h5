@@ -1,7 +1,7 @@
 var window = window || global;
 var document = document || (window.document = {});
 /***********************************/
-/*http://www.layabox.com 2016/11/11*/
+/*http://www.layabox.com  2017/3/23*/
 /***********************************/
 var Laya=window.Laya=(function(window,document){
 	var Laya={
@@ -23,10 +23,15 @@ var Laya=window.Laya=(function(window,document){
 		__extend:function(d,b){
 			for (var p in b){
 				if (!b.hasOwnProperty(p)) continue;
-				var g = Object.getOwnPropertyDescriptor(b, p).get, s = Object.getOwnPropertyDescriptor(b, p).set; 
+				var gs=Object.getOwnPropertyDescriptor(b, p);
+				var g = gs.get, s = gs.set; 
 				if ( g || s ) {
-					g && Object.defineProperty(d, p, g);
-					s && Object.defineProperty(d, p, s);
+					if ( g && s)
+						Object.defineProperty(d,p,gs);
+					else{
+						g && Object.defineProperty(d, p, g);
+						s && Object.defineProperty(d, p, s);
+					}
 				}
 				else d[p] = b[p];
 			}
@@ -79,13 +84,14 @@ var Laya=window.Laya=(function(window,document){
 				var supers=_super.split(',');
 				a.extend=[];
 				for(var i=0;i<supers.length;i++){
-					var name=supers[i];
-					ins[name]=ins[name] || {self:name};
-					a.extend.push(ins[name]);
+					var nm=supers[i];
+					ins[nm]=ins[nm] || {self:nm};
+					a.extend.push(ins[nm]);
 				}
 			}
 			var o=window,words=name.split('.');
-			for(var i=0;i<words.length-1;i++) o=o[words[i]];o[words[words.length-1]]={__interface__:name};
+			for(var i=0;i<words.length-1;i++) o=o[words[i]];
+			o[words[words.length-1]]={__interface__:name};
 		},
 		class:function(o,fullName,_super,miniName){
 			_super && Laya.__extend(o,_super);
@@ -181,7 +187,7 @@ var Laya=window.Laya=(function(window,document){
 	window.console=window.console || ({log:function(){}});
 	window.trace=window.console.log;
 	Error.prototype.throwError=function(){throw arguments;};
-	String.prototype.substr=Laya.__substr;
+	//String.prototype.substr=Laya.__substr;
 	Object.defineProperty(Array.prototype,'fixed',{enumerable: false});
 
 	return Laya;
@@ -196,127 +202,6 @@ var Laya=window.Laya=(function(window,document){
 	Laya.interface('laya.runtime.IConchNode');
 	Laya.interface('laya.filters.IFilterAction');
 	Laya.interface('laya.runtime.ICPlatformClass');
-	/**
-	*@private
-	*/
-	//class laya.utils.RunDriver
-	var RunDriver=(function(){
-		function RunDriver(){};
-		__class(RunDriver,'laya.utils.RunDriver');
-		RunDriver.FILTER_ACTIONS=[];
-		RunDriver.pixelRatio=-1;
-		RunDriver._charSizeTestDiv=null
-		RunDriver.now=function(){
-			return Date.now();
-		}
-
-		RunDriver.getWindow=function(){
-			return window;
-		}
-
-		RunDriver.getPixelRatio=function(){
-			if (RunDriver.pixelRatio < 0){
-				var ctx=Browser.context;
-				var backingStore=ctx.backingStorePixelRatio || ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
-				RunDriver.pixelRatio=(Browser.window.devicePixelRatio || 1)/ backingStore;
-				if (RunDriver.pixelRatio < 1)RunDriver.pixelRatio=1;
-			}
-			return RunDriver.pixelRatio;
-		}
-
-		RunDriver.getIncludeStr=function(name){
-			return null;
-		}
-
-		RunDriver.createShaderCondition=function(conditionScript){
-			var fn="(function() {return "+conditionScript+";})";
-			return Browser.window.eval(fn);
-		}
-
-		RunDriver.fontMap=[];
-		RunDriver.measureText=function(txt,font){
-			var isChinese=RunDriver.hanzi.test(txt);
-			if (isChinese && RunDriver.fontMap[font]){
-				return RunDriver.fontMap[font];
-			};
-			var ctx=Browser.context;
-			ctx.font=font;
-			var r=ctx.measureText(txt);
-			if (isChinese)RunDriver.fontMap[font]=r;
-			return r;
-		}
-
-		RunDriver.getWebGLContext=function(canvas){
-		};
-
-		RunDriver.beginFlush=function(){
-		};
-
-		RunDriver.endFinish=function(){
-		};
-
-		RunDriver.addToAtlas=null
-		RunDriver.flashFlushImage=function(atlasWebGLCanvas){
-		};
-
-		RunDriver.drawToCanvas=function(sprite,_renderType,canvasWidth,canvasHeight,offsetX,offsetY){
-			var canvas=HTMLCanvas.create("2D");
-			var context=new RenderContext(canvasWidth,canvasHeight,canvas);
-			RenderSprite.renders[_renderType]._fun(sprite,context,offsetX,offsetY);
-			return canvas;
-		}
-
-		RunDriver.createParticleTemplate2D=null
-		RunDriver.createGLTextur=null;
-		RunDriver.createWebGLContext2D=null;
-		RunDriver.changeWebGLSize=function(w,h){
-		};
-
-		RunDriver.createRenderSprite=function(type,next){
-			return new RenderSprite(type,next);
-		}
-
-		RunDriver.createFilterAction=function(type){
-			return new ColorFilterAction();
-		}
-
-		RunDriver.createGraphics=function(){
-			return new Graphics();
-		}
-
-		RunDriver.clear=function(value){
-			Render._context.ctx.clear();
-		}
-
-		RunDriver.clearAtlas=function(value){
-		};
-
-		RunDriver.isAtlas=function(bitmap){
-			return false;
-		}
-
-		RunDriver.addTextureToAtlas=function(value){
-		};
-
-		RunDriver.getTexturePixels=function(value,x,y,width,height){
-			return null;
-		}
-
-		RunDriver.skinAniSprite=function(){
-			return null;
-		}
-
-		__static(RunDriver,
-		['hanzi',function(){return this.hanzi=new RegExp("^[\u4E00-\u9FA5]$");}
-		]);
-		return RunDriver;
-	})()
-
-
-	/**
-	*<code>Laya</code> 是全局对象的引用入口集。
-	*Laya类引用了一些常用的全局对象，比如Laya.stage：舞台，Laya.timer：时间管理器，Laya.loader：加载管理器，使用时注意大小写。
-	*/
 	//class Laya
 	var ___Laya=(function(){
 		//function Laya(){};
@@ -392,70 +277,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*...测试
-	*@author ...Kanon
-	*/
-	//class Test
-	var Test=(function(){
-		function Test(){
-			this.touchY=NaN;
-			this.timer=null;
-			this.content=null;
-			Laya.init(1136,640);
-			var arr=[];
-			arr.push({url:"res/bg.png",type:"image"});
-			arr.push({url:"res/yellow.png",type:"image"});
-			Laya.loader.load(arr,Handler.create(this,this.loadImgComplete),null,"image");
-		}
-
-		__class(Test,'Test');
-		var __proto=Test.prototype;
-		__proto.loadImgComplete=function(){
-			var spt=new Sprite();
-			Laya.stage.addChild(spt);
-			spt.x=200;
-			spt.y=0;
-			var maskImg=new Image("yellow.png");
-			spt.width=129;
-			spt.height=352;
-			this.content=new Sprite();
-			this.content.width=129;
-			spt.addChild(this.content);
-			for (var i=0;i < 5;i++){
-				var img=new Image("bg.png");
-				img.y=i *130;
-				this.content.addChild(img);
-			}
-			this.content.height=i *130;
-			spt.mask=maskImg;
-			spt.on("mousedown",this,this.contentMouseDown);
-			Laya.stage.on("mouseup",this,this.contentMouseUp);
-			this.timer=new Timer();
-		}
-
-		__proto.loopHandler=function(){
-			var y=MouseManager.instance.mouseY-this.touchY;
-			this.content.y-=2;
-		}
-
-		__proto.contentMouseUp=function(){
-			this.timer.clear(this,this.loopHandler);
-		}
-
-		__proto.contentMouseDown=function(){
-			console.log("touch");
-			this.timer.frameLoop(1,this,this.loopHandler);
-			this.touchY=MouseManager.instance.mouseY;
-		}
-
-		return Test;
-	})()
-
-
-	/**
-	*<code>EventDispatcher</code> 类是可调度事件的所有类的基类。
-	*/
 	//class laya.events.EventDispatcher
 	var EventDispatcher=(function(){
 		var EventHandler;
@@ -652,105 +473,59 @@ var Laya=window.Laya=(function(window,document){
 
 
 	/**
-	*<p><code>Handler</code> 是事件处理器类。</p>
-	*<p>推荐使用 Handler.create()方法从对象池创建，减少对象创建消耗。创建的 Handler 对象不再使用后，可以使用 Handler.recover()将其回收到对象池，回收后不要再使用此对象，否则会导致不可预料的错误。</p>
-	*<p><b>注意：</b>由于鼠标事件也用本对象池，不正确的回收及调用，可能会影响鼠标事件的执行。</p>
+	*...测试
+	*@author ...Kanon
 	*/
-	//class laya.utils.Handler
-	var Handler=(function(){
-		function Handler(caller,method,args,once){
-			//this.caller=null;
-			//this.method=null;
-			//this.args=null;
-			this.once=false;
-			this._id=0;
-			(once===void 0)&& (once=false);
-			this.setTo(caller,method,args,once);
+	//class Test
+	var Test=(function(){
+		function Test(){
+			this.touchY=NaN;
+			this.timer=null;
+			this.scroll=null;
+			Laya.init(1136,640);
+			this.scroll=new ScorllContainer();
+			this.scroll.setViewSize(200,500);
+			this.scroll.gap=10;
+			Laya.stage.addChild(this.scroll);
+			var arr=[];
+			arr.push({url:"res/bg.png",type:"image"});
+			arr.push({url:"res/yellow.png",type:"image"});
+			Laya.loader.load(arr,Handler.create(this,this.loadImgComplete),null,"image");
 		}
 
-		__class(Handler,'laya.utils.Handler');
-		var __proto=Handler.prototype;
-		/**
-		*设置此对象的指定属性值。
-		*@param caller 执行域(this)。
-		*@param method 回调方法。
-		*@param args 携带的参数。
-		*@param once 是否只执行一次，如果为true，执行后执行recover()进行回收。
-		*@return 返回 handler 本身。
-		*/
-		__proto.setTo=function(caller,method,args,once){
-			this._id=Handler._gid++;
-			this.caller=caller;
-			this.method=method;
-			this.args=args;
-			this.once=once;
-			return this;
-		}
-
-		/**
-		*执行处理器。
-		*/
-		__proto.run=function(){
-			if (this.method==null)return null;
-			var id=this._id;
-			var result=this.method.apply(this.caller,this.args);
-			this._id===id && this.once && this.recover();
-			return result;
-		}
-
-		/**
-		*执行处理器，携带额外数据。
-		*@param data 附加的回调数据，可以是单数据或者Array(作为多参)。
-		*/
-		__proto.runWith=function(data){
-			if (this.method==null)return null;
-			var id=this._id;
-			if (data==null)
-				var result=this.method.apply(this.caller,this.args);
-			else if (!this.args && !data.unshift)result=this.method.call(this.caller,data);
-			else if (this.args)result=this.method.apply(this.caller,this.args.concat(data));
-			else result=this.method.apply(this.caller,data);
-			this._id===id && this.once && this.recover();
-			return result;
-		}
-
-		/**
-		*清理对象引用。
-		*/
-		__proto.clear=function(){
-			this.caller=null;
-			this.method=null;
-			this.args=null;
-			return this;
-		}
-
-		/**
-		*清理并回收到 Handler 对象池内。
-		*/
-		__proto.recover=function(){
-			if (this._id > 0){
-				this._id=0;
-				Handler._pool.push(this.clear());
+		__class(Test,'Test');
+		var __proto=Test.prototype;
+		__proto.loadImgComplete=function(){
+			this.scroll.x=300;
+			this.scroll.y=20;
+			for (var i=0;i < 5;i++){
+				var img=new Image("res/bg.png");
+				this.scroll.addNode(img);
 			}
+			this.timer=new Timer();
+			Laya.stage.on("click",this,this.clickHandler);
 		}
 
-		Handler.create=function(caller,method,args,once){
-			(once===void 0)&& (once=true);
-			if (Handler._pool.length)return Handler._pool.pop().setTo(caller,method,args,once);
-			return new Handler(caller,method,args,once);
+		__proto.clickHandler=function(){}
+		//this.scroll.isHorizontal=true;
+		__proto.loopHandler=function(){
+			var y=MouseManager.instance.mouseY-this.touchY;
 		}
 
-		Handler._pool=[];
-		Handler._gid=1;
-		return Handler;
+		__proto.contentMouseUp=function(){
+			this.timer.clear(this,this.loopHandler);
+		}
+
+		__proto.contentMouseDown=function(){
+			console.log("touch");
+			this.timer.frameLoop(1,this,this.loopHandler);
+			this.touchY=MouseManager.instance.mouseY;
+		}
+
+		return Test;
 	})()
 
 
-	/**
-	*<code>Graphics</code> 类用于创建绘图显示对象。Graphics可以同时绘制多个位图或者矢量图，还可以结合save，restore，transform，scale，rotate，translate，alpha等指令对绘图效果进行变化。
-	*Graphics以命令流方式存储，可以通过cmds属性访问所有命令流。Graphics是比Sprite更轻量级的对象，合理使用能提高应用性能(比如把大量的节点绘图改为一个节点的Graphics命令集合，能减少大量节点创建消耗)。
-	*@see laya.display.Sprite#graphics
-	*/
 	//class laya.display.Graphics
 	var Graphics=(function(){
 		function Graphics(){
@@ -1514,9 +1289,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>BitmapFont</code> 是位图字体类，用于定义位图字体信息。
-	*/
 	//class laya.display.BitmapFont
 	var BitmapFont=(function(){
 		function BitmapFont(){
@@ -1685,10 +1457,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Style</code> 类是元素样式定义类。
-	*/
 	//class laya.display.css.Style
 	var Style=(function(){
 		function Style(){
@@ -1855,10 +1623,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Font</code> 类是字体显示定义类。
-	*/
 	//class laya.display.css.Font
 	var Font=(function(){
 		function Font(src){
@@ -2032,9 +1796,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*/
 	//class laya.display.css.TransformInfo
 	var TransformInfo=(function(){
 		function TransformInfo(){
@@ -2052,10 +1813,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*Graphic bounds数据类
-	*/
 	//class laya.display.GraphicsBounds
 	var GraphicsBounds=(function(){
 		function GraphicsBounds(){
@@ -2357,9 +2114,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Event</code> 是事件类型的集合。一般当发生事件时，<code>Event</code> 对象将作为参数传递给事件侦听器。
-	*/
 	//class laya.events.Event
 	var Event=(function(){
 		function Event(){
@@ -2530,12 +2284,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p><code>KeyBoardManager</code> 是键盘事件管理类。该类从浏览器中接收键盘事件，并派发该事件。</p>
-	*<p>派发事件时若 Stage.focus 为空则只从 Stage 上派发该事件，否则将从 Stage.focus 对象开始一直冒泡派发该事件。所以在 Laya.stage 上监听键盘事件一定能够收到，如果在其他地方监听，则必须处在Stage.focus的冒泡链上才能收到该事件。</p>
-	*<p>用户可以通过代码 Laya.stage.focus=someNode 的方式来设置focus对象。</p>
-	*<p>用户可统一的根据事件对象中 e.keyCode 来判断按键类型，该属性兼容了不同浏览器的实现。</p>
-	*/
 	//class laya.events.KeyBoardManager
 	var KeyBoardManager=(function(){
 		function KeyBoardManager(){};
@@ -2580,13 +2328,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p><code>MouseManager</code> 是鼠标、触摸交互管理器。</p>
-	*<p>鼠标事件流包括捕获阶段、目标阶段、冒泡阶段。<br/>
-	*捕获阶段：此阶段引擎会从stage开始递归检测stage及其子对象，直到找到命中的目标对象或者未命中任何对象；<br/>
-	*目标阶段：找到命中的目标对象；<br/>
-	*冒泡阶段：事件离开目标对象，按节点层级向上逐层通知，直到到达舞台的过程。</p>
-	*/
 	//class laya.events.MouseManager
 	var MouseManager=(function(){
 		function MouseManager(){
@@ -2893,10 +2634,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*Touch事件管理类，处理多点触控下的鼠标事件
-	*/
 	//class laya.events.TouchManager
 	var TouchManager=(function(){
 		function TouchManager(){
@@ -3197,9 +2934,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Filter</code> 是滤镜基类。
-	*/
 	//class laya.filters.Filter
 	var Filter=(function(){
 		function Filter(){
@@ -3231,10 +2965,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>ColorFilterAction</code> 是一个颜色滤镜应用类。
-	*/
 	//class laya.filters.ColorFilterAction
 	var ColorFilterAction=(function(){
 		function ColorFilterAction(){
@@ -3285,10 +3015,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*计算贝塞尔曲线的工具类。
-	*/
 	//class laya.maths.Bezier
 	var Bezier=(function(){
 		function Bezier(){
@@ -3398,10 +3124,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*凸包算法。
-	*/
 	//class laya.maths.GrahamScan
 	var GrahamScan=(function(){
 		function GrahamScan(){};
@@ -3520,10 +3242,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p> <code>Matrix</code> 类表示一个转换矩阵，它确定如何将点从一个坐标空间映射到另一个坐标空间。</p>
-	*<p>您可以对一个显示对象执行不同的图形转换，方法是设置 Matrix 对象的属性，将该 Matrix 对象应用于 Transform 对象的 matrix 属性，然后应用该 Transform 对象作为显示对象的 transform 属性。这些转换函数包括平移（x 和 y 重新定位）、旋转、缩放和倾斜。</p>
-	*/
 	//class laya.maths.Matrix
 	var Matrix=(function(){
 		function Matrix(a,b,c,d,tx,ty){
@@ -4011,9 +3729,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Point</code> 对象表示二维坐标系统中的某个位置，其中 x 表示水平轴，y 表示垂直轴。
-	*/
 	//class laya.maths.Point
 	var Point=(function(){
 		function Point(x,y){
@@ -4072,10 +3787,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p><code>Rectangle</code> 对象是按其位置（由它左上角的点 (x,y)确定）以及宽度和高度定义的区域。</p>
-	*<p>Rectangle 类的 x、y、width 和 height 属性相互独立；更改一个属性的值不会影响其他属性。</p>
-	*/
 	//class laya.maths.Rectangle
 	var Rectangle=(function(){
 		function Rectangle(x,y,width,height){
@@ -4292,14 +4003,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>SoundManager</code> 是一个声音管理类。提供了对背景音乐、音效的播放控制方法。
-	*引擎默认有两套声音方案：WebAudio和H5Audio
-	*播放音效，优先使用WebAudio播放声音，如果WebAudio不可用，则用H5Audio播放，H5Audio在部分机器上有兼容问题（比如不能混音，播放有延迟等）。
-	*播放背景音乐，则使用H5Audio播放（使用WebAudio会增加特别大的内存，并且要等加载完毕后才能播放，有延迟）
-	*建议背景音乐用mp3类型，音效用wav或者mp3类型（如果打包为app，音效只能用wav格式）。
-	*详细教程及声音格式请参考：http://ldc.layabox.com/doc/?nav=ch-as-1-7-0
-	*/
 	//class laya.media.SoundManager
 	var SoundManager=(function(){
 		function SoundManager(){};
@@ -4569,9 +4272,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p> <code>LocalStorage</code> 类用于没有时间限制的数据存储。</p>
-	*/
 	//class laya.net.LocalStorage
 	var LocalStorage=(function(){
 		var Storage;
@@ -4657,9 +4357,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p> <code>URL</code> 类用于定义地址信息。</p>
-	*/
 	//class laya.net.URL
 	var URL=(function(){
 		function URL(url){
@@ -4736,10 +4433,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Render</code> 是渲染管理类。它是一个单例，可以使用 Laya.render 访问。
-	*/
 	//class laya.renders.Render
 	var Render=(function(){
 		function Render(width,height){
@@ -4815,10 +4508,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*渲染环境
-	*/
 	//class laya.renders.RenderContext
 	var RenderContext=(function(){
 		function RenderContext(width,height,canvas){
@@ -5285,10 +4974,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*精灵渲染器
-	*/
 	//class laya.renders.RenderSprite
 	var RenderSprite=(function(){
 		function RenderSprite(type,next){
@@ -5665,10 +5350,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*Context扩展类
-	*/
 	//class laya.resource.Context
 	var Context=(function(){
 		function Context(){
@@ -5991,10 +5672,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>ResourceManager</code> 是资源管理类。它用于资源的载入、获取、销毁。
-	*/
 	//class laya.resource.ResourceManager
 	var ResourceManager=(function(){
 		function ResourceManager(){
@@ -6286,9 +5963,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>LayoutStyle</code> 是一个布局样式类。
-	*/
 	//class laya.ui.LayoutStyle
 	var LayoutStyle=(function(){
 		function LayoutStyle(){
@@ -6311,9 +5985,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Styles</code> 定义了组件常用的样式属性。
-	*/
 	//class laya.ui.Styles
 	var Styles=(function(){
 		function Styles(){};
@@ -6329,9 +6000,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>UIUtils</code> 是文本工具集。
-	*/
 	//class laya.ui.UIUtils
 	var UIUtils=(function(){
 		function UIUtils(){};
@@ -6394,10 +6062,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	SoundManager;
-	/**
-	*<code>Browser</code> 是浏览器代理类。封装浏览器及原生 js 提供的一些功能。
-	*/
 	//class laya.utils.Browser
 	var Browser=(function(){
 		function Browser(){};
@@ -6576,10 +6240,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*对象缓存统一管理类
-	*/
 	//class laya.utils.CacheManger
 	var CacheManger=(function(){
 		function CacheManger(){}
@@ -6641,10 +6301,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Color</code> 是一个颜色值处理类。
-	*/
 	//class laya.utils.Color
 	var Color=(function(){
 		function Color(str){
@@ -6707,10 +6363,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Dragging</code> 类是触摸滑动控件。
-	*/
 	//class laya.utils.Dragging
 	var Dragging=(function(){
 		function Dragging(){
@@ -6953,9 +6605,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Ease</code> 类定义了缓动函数，以便实现 <code>Tween</code> 动画的缓动效果。
-	*/
 	//class laya.utils.Ease
 	var Ease=(function(){
 		function Ease(){};
@@ -7162,9 +6811,96 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*鼠标点击区域，可以设置绘制一系列矢量图作为点击区域和非点击区域（目前只支持圆形，矩形，多边形）
-	*/
+	//class laya.utils.Handler
+	var Handler=(function(){
+		function Handler(caller,method,args,once){
+			//this.caller=null;
+			//this.method=null;
+			//this.args=null;
+			this.once=false;
+			this._id=0;
+			(once===void 0)&& (once=false);
+			this.setTo(caller,method,args,once);
+		}
+
+		__class(Handler,'laya.utils.Handler');
+		var __proto=Handler.prototype;
+		/**
+		*设置此对象的指定属性值。
+		*@param caller 执行域(this)。
+		*@param method 回调方法。
+		*@param args 携带的参数。
+		*@param once 是否只执行一次，如果为true，执行后执行recover()进行回收。
+		*@return 返回 handler 本身。
+		*/
+		__proto.setTo=function(caller,method,args,once){
+			this._id=Handler._gid++;
+			this.caller=caller;
+			this.method=method;
+			this.args=args;
+			this.once=once;
+			return this;
+		}
+
+		/**
+		*执行处理器。
+		*/
+		__proto.run=function(){
+			if (this.method==null)return null;
+			var id=this._id;
+			var result=this.method.apply(this.caller,this.args);
+			this._id===id && this.once && this.recover();
+			return result;
+		}
+
+		/**
+		*执行处理器，携带额外数据。
+		*@param data 附加的回调数据，可以是单数据或者Array(作为多参)。
+		*/
+		__proto.runWith=function(data){
+			if (this.method==null)return null;
+			var id=this._id;
+			if (data==null)
+				var result=this.method.apply(this.caller,this.args);
+			else if (!this.args && !data.unshift)result=this.method.call(this.caller,data);
+			else if (this.args)result=this.method.apply(this.caller,this.args.concat(data));
+			else result=this.method.apply(this.caller,data);
+			this._id===id && this.once && this.recover();
+			return result;
+		}
+
+		/**
+		*清理对象引用。
+		*/
+		__proto.clear=function(){
+			this.caller=null;
+			this.method=null;
+			this.args=null;
+			return this;
+		}
+
+		/**
+		*清理并回收到 Handler 对象池内。
+		*/
+		__proto.recover=function(){
+			if (this._id > 0){
+				this._id=0;
+				Handler._pool.push(this.clear());
+			}
+		}
+
+		Handler.create=function(caller,method,args,once){
+			(once===void 0)&& (once=true);
+			if (Handler._pool.length)return Handler._pool.pop().setTo(caller,method,args,once);
+			return new Handler(caller,method,args,once);
+		}
+
+		Handler._pool=[];
+		Handler._gid=1;
+		return Handler;
+	})()
+
+
 	//class laya.utils.HitArea
 	var HitArea=(function(){
 		function HitArea(){
@@ -7310,10 +7046,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>HTMLChar</code> 是一个 HTML 字符类。
-	*/
 	//class laya.utils.HTMLChar
 	var HTMLChar=(function(){
 		function HTMLChar(char,w,h,style){
@@ -7413,10 +7145,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p> <code>Pool</code> 是对象池类，用于对象的存贮、重复使用。</p>
-	*<p>合理使用对象池，可以有效减少对象创建的开销，避免频繁的垃圾回收，从而优化游戏流畅度。</p>
-	*/
 	//class laya.utils.Pool
 	var Pool=(function(){
 		function Pool(){};
@@ -7464,16 +7192,120 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<p> <code>Stat</code> 是一个性能统计面板，可以实时更新相关的性能参数。</p>
-	*<p>参与统计的性能参数如下（所有参数都是每大约1秒进行更新）：<br/>
-	*FPS(Canvas)/FPS(WebGL)：Canvas 模式或者 WebGL 模式下的帧频，也就是每秒显示的帧数，值越高、越稳定，感觉越流畅；<br/>
-	*Sprite：统计所有渲染节点（包括容器）数量，它的大小会影响引擎进行节点遍历、数据组织和渲染的效率。其值越小，游戏运行效率越高；<br/>
-	*DrawCall：此值是决定性能的重要指标，其值越小，游戏运行效率越高。Canvas模式下表示每大约1秒的图像绘制次数；WebGL模式下表示每大约1秒的渲染提交批次，每次准备数据并通知GPU渲染绘制的过程称为1次DrawCall，在每次DrawCall中除了在通知GPU的渲染上比较耗时之外，切换材质与shader也是非常耗时的操作；<br/>
-	*CurMem：Canvas模式下，表示内存占用大小，值越小越好，过高会导致游戏闪退；WebGL模式下，表示内存与显存的占用，值越小越好；<br/>
-	*Shader：是 WebGL 模式独有的性能指标，表示每大约1秒 Shader 提交次数，值越小越好；<br/>
-	*Canvas：由三个数值组成，只有设置 CacheAs 后才会有值，默认为0/0/0。从左到右数值的意义分别为：每帧重绘的画布数量 / 缓存类型为"normal"类型的画布数量 / 缓存类型为"bitmap"类型的画布数量。</p>
-	*/
+	//class laya.utils.RunDriver
+	var RunDriver=(function(){
+		function RunDriver(){};
+		__class(RunDriver,'laya.utils.RunDriver');
+		RunDriver.FILTER_ACTIONS=[];
+		RunDriver.pixelRatio=-1;
+		RunDriver._charSizeTestDiv=null
+		RunDriver.now=function(){
+			return Date.now();
+		}
+
+		RunDriver.getWindow=function(){
+			return window;
+		}
+
+		RunDriver.getPixelRatio=function(){
+			if (RunDriver.pixelRatio < 0){
+				var ctx=Browser.context;
+				var backingStore=ctx.backingStorePixelRatio || ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
+				RunDriver.pixelRatio=(Browser.window.devicePixelRatio || 1)/ backingStore;
+				if (RunDriver.pixelRatio < 1)RunDriver.pixelRatio=1;
+			}
+			return RunDriver.pixelRatio;
+		}
+
+		RunDriver.getIncludeStr=function(name){
+			return null;
+		}
+
+		RunDriver.createShaderCondition=function(conditionScript){
+			var fn="(function() {return "+conditionScript+";})";
+			return Browser.window.eval(fn);
+		}
+
+		RunDriver.fontMap=[];
+		RunDriver.measureText=function(txt,font){
+			var isChinese=RunDriver.hanzi.test(txt);
+			if (isChinese && RunDriver.fontMap[font]){
+				return RunDriver.fontMap[font];
+			};
+			var ctx=Browser.context;
+			ctx.font=font;
+			var r=ctx.measureText(txt);
+			if (isChinese)RunDriver.fontMap[font]=r;
+			return r;
+		}
+
+		RunDriver.getWebGLContext=function(canvas){
+		};
+
+		RunDriver.beginFlush=function(){
+		};
+
+		RunDriver.endFinish=function(){
+		};
+
+		RunDriver.addToAtlas=null
+		RunDriver.flashFlushImage=function(atlasWebGLCanvas){
+		};
+
+		RunDriver.drawToCanvas=function(sprite,_renderType,canvasWidth,canvasHeight,offsetX,offsetY){
+			var canvas=HTMLCanvas.create("2D");
+			var context=new RenderContext(canvasWidth,canvasHeight,canvas);
+			RenderSprite.renders[_renderType]._fun(sprite,context,offsetX,offsetY);
+			return canvas;
+		}
+
+		RunDriver.createParticleTemplate2D=null
+		RunDriver.createGLTextur=null;
+		RunDriver.createWebGLContext2D=null;
+		RunDriver.changeWebGLSize=function(w,h){
+		};
+
+		RunDriver.createRenderSprite=function(type,next){
+			return new RenderSprite(type,next);
+		}
+
+		RunDriver.createFilterAction=function(type){
+			return new ColorFilterAction();
+		}
+
+		RunDriver.createGraphics=function(){
+			return new Graphics();
+		}
+
+		RunDriver.clear=function(value){
+			Render._context.ctx.clear();
+		}
+
+		RunDriver.clearAtlas=function(value){
+		};
+
+		RunDriver.isAtlas=function(bitmap){
+			return false;
+		}
+
+		RunDriver.addTextureToAtlas=function(value){
+		};
+
+		RunDriver.getTexturePixels=function(value,x,y,width,height){
+			return null;
+		}
+
+		RunDriver.skinAniSprite=function(){
+			return null;
+		}
+
+		__static(RunDriver,
+		['hanzi',function(){return this.hanzi=new RegExp("^[\u4E00-\u9FA5]$");}
+		]);
+		return RunDriver;
+	})()
+
+
 	//class laya.utils.Stat
 	var Stat=(function(){
 		function Stat(){};
@@ -7618,9 +7450,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Timer</code> 是时钟管理类。它是一个单例，不要手动实例化此类，应该通过 Laya.timer 访问。
-	*/
 	//class laya.utils.Timer
 	var Timer=(function(){
 		var TimerHandler;
@@ -7942,9 +7771,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Tween</code> 是一个缓动类。使用此类能够实现对目标对象属性的渐变。
-	*/
 	//class laya.utils.Tween
 	var Tween=(function(){
 		function Tween(){
@@ -8222,9 +8048,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*<code>Utils</code> 是工具类。
-	*/
 	//class laya.utils.Utils
 	var Utils=(function(){
 		function Utils(){};
@@ -8429,9 +8252,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*/
 	//class laya.utils.VectorGraphManager
 	var VectorGraphManager=(function(){
 		function VectorGraphManager(){
@@ -8561,9 +8381,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*/
 	//class laya.utils.WordText
 	var WordText=(function(){
 		function WordText(){
@@ -8601,201 +8418,6 @@ var Laya=window.Laya=(function(window,document){
 	})()
 
 
-	/**
-	*@private
-	*<code>Resource</code> 资源存取类。
-	*/
-	//class laya.resource.Resource extends laya.events.EventDispatcher
-	var Resource=(function(_super){
-		function Resource(){
-			//this.__loaded=false;
-			//this._memorySize=0;
-			//this._id=0;
-			//this._url=null;
-			//this._released=false;
-			//this._disposed=false;
-			//this._resourceManager=null;
-			//this._lastUseFrameCount=0;
-			//this.lock=false;
-			//this.name=null;
-			Resource.__super.call(this);
-			this._$1__id=++Resource._uniqueIDCounter;
-			this.__loaded=true;
-			this._disposed=false;
-			Resource._loadedResources.push(this);
-			this._released=true;
-			this.lock=false;
-			this._memorySize=0;
-			this._lastUseFrameCount=-1;
-			(ResourceManager.currentResourceManager)&& (ResourceManager.currentResourceManager.addResource(this));
-		}
-
-		__class(Resource,'laya.resource.Resource',_super);
-		var __proto=Resource.prototype;
-		Laya.imps(__proto,{"laya.resource.ICreateResource":true,"laya.resource.IDispose":true})
-		/**
-		*@private
-		*/
-		__proto._endLoaded=function(){
-			this.__loaded=true;
-			this.event("loaded",this);
-		}
-
-		/**重新创建资源,override it，同时修改memorySize属性、处理startCreate()和compoleteCreate()方法。*/
-		__proto.recreateResource=function(){
-			this.completeCreate();
-		}
-
-		/**销毁资源，override it,同时修改memorySize属性。*/
-		__proto.detoryResource=function(){}
-		/**
-		*激活资源，使用资源前应先调用此函数激活。
-		*@param force 是否强制创建。
-		*/
-		__proto.activeResource=function(force){
-			(force===void 0)&& (force=false);
-			this._lastUseFrameCount=Stat.loopCount;
-			if (!this._disposed && (this._released || force))
-				this.recreateResource();
-		}
-
-		/**
-		*释放资源。
-		*@param force 是否强制释放。
-		*@return 是否成功释放。
-		*/
-		__proto.releaseResource=function(force){
-			(force===void 0)&& (force=false);
-			if (!force && this.lock)
-				return false;
-			if (!this._released || force){
-				this.detoryResource();
-				this._released=true;
-				this._lastUseFrameCount=-1;
-				this.event("released",this);
-				return true;
-				}else {
-				return false;
-			}
-		}
-
-		/**
-		*@private
-		*/
-		__proto.onAsynLoaded=function(url,data,params){
-			throw new Error("Resource: must override this function!");
-		}
-
-		/**
-		*<p>彻底处理资源，处理后不能恢复。</p>
-		*<p><b>注意：</b>会强制解锁清理。</p>
-		*/
-		__proto.dispose=function(){
-			if (this._disposed)
-				return;
-			if (this._resourceManager!==null)
-				this._resourceManager.removeResource(this);
-			this._disposed=true;
-			this.lock=false;
-			this.releaseResource();
-			var index=Resource._loadedResources.indexOf(this);
-			(index!==-1)&& (Resource._loadedResources.splice(index,1));
-			Loader.clearRes(this._url);
-		}
-
-		/**完成资源激活。*/
-		__proto.completeCreate=function(){
-			this._released=false;
-			this.event("recovered",this);
-		}
-
-		/**
-		*@private
-		*/
-		/**
-		*占用内存尺寸。
-		*/
-		__getset(0,__proto,'memorySize',function(){
-			return this._memorySize;
-			},function(value){
-			var offsetValue=value-this._memorySize;
-			this._memorySize=value;
-			this.resourceManager && this.resourceManager.addSize(offsetValue);
-		});
-
-		/**
-		*@private
-		*/
-		__getset(0,__proto,'_loaded',null,function(value){
-			this.__loaded=value;
-		});
-
-		/**
-		*获取是否已加载完成。
-		*/
-		__getset(0,__proto,'loaded',function(){
-			return this.__loaded;
-		});
-
-		/**
-		*获取唯一标识ID,通常用于识别。
-		*/
-		__getset(0,__proto,'id',function(){
-			return this._$1__id;
-		});
-
-		/**
-		*资源管理员。
-		*/
-		__getset(0,__proto,'resourceManager',function(){
-			return this._resourceManager;
-		});
-
-		/**
-		*设置资源的URL地址。
-		*@param value URL地址。
-		*/
-		/**
-		*获取资源的URL地址。
-		*@return URL地址。
-		*/
-		__getset(0,__proto,'url',function(){
-			return this._url;
-			},function(value){
-			this._url=value;
-		});
-
-		/**
-		*是否已处理。
-		*/
-		__getset(0,__proto,'disposed',function(){
-			return this._disposed;
-		});
-
-		/**
-		*是否已释放。
-		*/
-		__getset(0,__proto,'released',function(){
-			return this._released;
-		});
-
-		Resource.getLoadedResourceByIndex=function(index){
-			return Resource._loadedResources[index];
-		}
-
-		Resource.getLoadedResourcesCount=function(){
-			return Resource._loadedResources.length;
-		}
-
-		Resource._uniqueIDCounter=0;
-		Resource._loadedResources=[];
-		return Resource;
-	})(EventDispatcher)
-
-
-	/**
-	*<code>Node</code> 类是可放在显示列表中的所有对象的基类。该显示列表管理 Laya 运行时中显示的所有对象。使用 Node 类排列显示列表中的显示对象。Node 对象可以有子显示对象。
-	*/
 	//class laya.display.Node extends laya.events.EventDispatcher
 	var Node=(function(_super){
 		function Node(){
@@ -9339,16 +8961,194 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<p> <code>LoaderManager</code> 类用于用于批量加载资源。此类是单例，不要手动实例化此类，请通过Laya.loader访问。</p>
-	*<p>全部队列加载完成，会派发 Event.COMPLETE 事件；如果队列中任意一个加载失败，会派发 Event.ERROR 事件，事件回调参数值为加载出错的资源地址。</p>
-	*<p> <code>LoaderManager</code> 类提供了以下几种功能：<br/>
-	*多线程：默认5个加载线程，可以通过maxLoader属性修改线程数量；<br/>
-	*多优先级：有0-4共5个优先级，优先级高的优先加载。0最高，4最低；<br/>
-	*重复过滤：自动过滤重复加载（不会有多个相同地址的资源同时加载）以及复用缓存资源，防止重复加载；<br/>
-	*错误重试：资源加载失败后，会重试加载（以最低优先级插入加载队列），retryNum设定加载失败后重试次数，retryDelay设定加载重试的时间间隔。</p>
-	*@see laya.net.Loader
-	*/
+	//class laya.resource.Resource extends laya.events.EventDispatcher
+	var Resource=(function(_super){
+		function Resource(){
+			//this.__loaded=false;
+			//this._memorySize=0;
+			//this._id=0;
+			//this._url=null;
+			//this._released=false;
+			//this._disposed=false;
+			//this._resourceManager=null;
+			//this._lastUseFrameCount=0;
+			//this.lock=false;
+			//this.name=null;
+			Resource.__super.call(this);
+			this._$1__id=++Resource._uniqueIDCounter;
+			this.__loaded=true;
+			this._disposed=false;
+			Resource._loadedResources.push(this);
+			this._released=true;
+			this.lock=false;
+			this._memorySize=0;
+			this._lastUseFrameCount=-1;
+			(ResourceManager.currentResourceManager)&& (ResourceManager.currentResourceManager.addResource(this));
+		}
+
+		__class(Resource,'laya.resource.Resource',_super);
+		var __proto=Resource.prototype;
+		Laya.imps(__proto,{"laya.resource.ICreateResource":true,"laya.resource.IDispose":true})
+		/**
+		*@private
+		*/
+		__proto._endLoaded=function(){
+			this.__loaded=true;
+			this.event("loaded",this);
+		}
+
+		/**重新创建资源,override it，同时修改memorySize属性、处理startCreate()和compoleteCreate()方法。*/
+		__proto.recreateResource=function(){
+			this.completeCreate();
+		}
+
+		/**销毁资源，override it,同时修改memorySize属性。*/
+		__proto.detoryResource=function(){}
+		/**
+		*激活资源，使用资源前应先调用此函数激活。
+		*@param force 是否强制创建。
+		*/
+		__proto.activeResource=function(force){
+			(force===void 0)&& (force=false);
+			this._lastUseFrameCount=Stat.loopCount;
+			if (!this._disposed && (this._released || force))
+				this.recreateResource();
+		}
+
+		/**
+		*释放资源。
+		*@param force 是否强制释放。
+		*@return 是否成功释放。
+		*/
+		__proto.releaseResource=function(force){
+			(force===void 0)&& (force=false);
+			if (!force && this.lock)
+				return false;
+			if (!this._released || force){
+				this.detoryResource();
+				this._released=true;
+				this._lastUseFrameCount=-1;
+				this.event("released",this);
+				return true;
+				}else {
+				return false;
+			}
+		}
+
+		/**
+		*@private
+		*/
+		__proto.onAsynLoaded=function(url,data,params){
+			throw new Error("Resource: must override this function!");
+		}
+
+		/**
+		*<p>彻底处理资源，处理后不能恢复。</p>
+		*<p><b>注意：</b>会强制解锁清理。</p>
+		*/
+		__proto.dispose=function(){
+			if (this._disposed)
+				return;
+			if (this._resourceManager!==null)
+				this._resourceManager.removeResource(this);
+			this._disposed=true;
+			this.lock=false;
+			this.releaseResource();
+			var index=Resource._loadedResources.indexOf(this);
+			(index!==-1)&& (Resource._loadedResources.splice(index,1));
+			Loader.clearRes(this._url);
+		}
+
+		/**完成资源激活。*/
+		__proto.completeCreate=function(){
+			this._released=false;
+			this.event("recovered",this);
+		}
+
+		/**
+		*@private
+		*/
+		/**
+		*占用内存尺寸。
+		*/
+		__getset(0,__proto,'memorySize',function(){
+			return this._memorySize;
+			},function(value){
+			var offsetValue=value-this._memorySize;
+			this._memorySize=value;
+			this.resourceManager && this.resourceManager.addSize(offsetValue);
+		});
+
+		/**
+		*@private
+		*/
+		__getset(0,__proto,'_loaded',null,function(value){
+			this.__loaded=value;
+		});
+
+		/**
+		*获取是否已加载完成。
+		*/
+		__getset(0,__proto,'loaded',function(){
+			return this.__loaded;
+		});
+
+		/**
+		*获取唯一标识ID,通常用于识别。
+		*/
+		__getset(0,__proto,'id',function(){
+			return this._$1__id;
+		});
+
+		/**
+		*资源管理员。
+		*/
+		__getset(0,__proto,'resourceManager',function(){
+			return this._resourceManager;
+		});
+
+		/**
+		*设置资源的URL地址。
+		*@param value URL地址。
+		*/
+		/**
+		*获取资源的URL地址。
+		*@return URL地址。
+		*/
+		__getset(0,__proto,'url',function(){
+			return this._url;
+			},function(value){
+			this._url=value;
+		});
+
+		/**
+		*是否已处理。
+		*/
+		__getset(0,__proto,'disposed',function(){
+			return this._disposed;
+		});
+
+		/**
+		*是否已释放。
+		*/
+		__getset(0,__proto,'released',function(){
+			return this._released;
+		});
+
+		Resource.getLoadedResourceByIndex=function(index){
+			return Resource._loadedResources[index];
+		}
+
+		Resource.getLoadedResourcesCount=function(){
+			return Resource._loadedResources.length;
+		}
+
+		Resource._uniqueIDCounter=0;
+		Resource._loadedResources=[];
+		return Resource;
+	})(EventDispatcher)
+
+
 	//class laya.net.LoaderManager extends laya.events.EventDispatcher
 	var LoaderManager=(function(_super){
 		var ResInfo;
@@ -9735,10 +9535,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*@private
-	*使用Audio标签播放声音
-	*/
 	//class laya.media.h5audio.AudioSound extends laya.events.EventDispatcher
 	var AudioSound=(function(_super){
 		function AudioSound(){
@@ -9897,10 +9693,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<p> <code>SoundChannel</code> 用来控制程序中的声音。每个声音均分配给一个声道，而且应用程序可以具有混合在一起的多个声道。</p>
-	*<p> <code>SoundChannel</code> 类包含控制声音的播放、暂停、停止、音量的方法，以及获取声音的播放状态、总时间、当前播放时间、总循环次数、播放地址等信息的方法。</p>
-	*/
 	//class laya.media.SoundChannel extends laya.events.EventDispatcher
 	var SoundChannel=(function(_super){
 		function SoundChannel(){
@@ -9965,9 +9757,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<code>Sound</code> 类是用来播放控制声音的类。
-	*/
 	//class laya.media.Sound extends laya.events.EventDispatcher
 	var Sound=(function(_super){
 		function Sound(){Sound.__super.call(this);;
@@ -10010,10 +9799,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*@private
-	*web audio api方式播放声音
-	*/
 	//class laya.media.webaudio.WebAudioSound extends laya.events.EventDispatcher
 	var WebAudioSound=(function(_super){
 		function WebAudioSound(){
@@ -10200,10 +9985,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<p> <code>HttpRequest</code> 通过封装 HTML <code>XMLHttpRequest</code> 对象提供了对 HTTP 协议的完全的访问，包括做出 POST 和 HEAD 请求以及普通的 GET 请求的能力。 <code>HttpRequest</code> 只提供以异步的形式返回 Web 服务器的响应，并且能够以文本或者二进制的形式返回内容。</p>
-	*<p><b>注意：</b>建议每次请求都使用新的 <code>HttpRequest</code> 对象，因为每次调用该对象的send方法时，都会清空之前设置的数据，并重置 HTTP 请求的状态，这会导致之前还未返回响应的请求被重置，从而得不到之前请求的响应结果。</p>
-	*/
 	//class laya.net.HttpRequest extends laya.events.EventDispatcher
 	var HttpRequest=(function(_super){
 		function HttpRequest(){
@@ -10359,9 +10140,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<code>Loader</code> 类可用来加载文本、JSON、XML、二进制、图像等资源。
-	*/
 	//class laya.net.Loader extends laya.events.EventDispatcher
 	var Loader=(function(_super){
 		function Loader(){
@@ -10753,9 +10531,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<code>Texture</code> 是一个纹理处理类。
-	*/
 	//class laya.resource.Texture extends laya.events.EventDispatcher
 	var Texture=(function(_super){
 		function Texture(bitmap,uv){
@@ -11038,10 +10813,6 @@ var Laya=window.Laya=(function(window,document){
 	})(EventDispatcher)
 
 
-	/**
-	*<code>AutoBitmap</code> 类是用于表示位图图像或绘制图形的显示对象。
-	*<p>封装了位置，宽高及九宫格的处理，供UI组件使用。</p>
-	*/
 	//class laya.ui.AutoBitmap extends laya.display.Graphics
 	var AutoBitmap=(function(_super){
 		function AutoBitmap(){
@@ -11252,10 +11023,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Graphics)
 
 
-	/**
-	*@private
-	*<code>CSSStyle</code> 类是元素CSS样式定义类。
-	*/
 	//class laya.display.css.CSSStyle extends laya.display.css.Style
 	var CSSStyle=(function(_super){
 		function CSSStyle(ower){
@@ -11939,10 +11706,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Style)
 
 
-	/**
-	*<p><code>ColorFilter</code> 是颜色滤镜。使用 ColorFilter 类可以将 4 x 5 矩阵转换应用于输入图像上的每个像素的 RGBA 颜色和 Alpha 值，以生成具有一组新的 RGBA 颜色和 Alpha 值的结果。该类允许饱和度更改、色相旋转、亮度转 Alpha 以及各种其他效果。您可以将滤镜应用于任何显示对象（即，从 Sprite 类继承的对象）。</p>
-	*<p>注意：对于 RGBA 值，最高有效字节代表红色通道值，其后的有效字节分别代表绿色、蓝色和 Alpha 通道值。</p>
-	*/
 	//class laya.filters.ColorFilter extends laya.filters.Filter
 	var ColorFilter=(function(_super){
 		function ColorFilter(mat){
@@ -11992,9 +11755,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Filter)
 
 
-	/**
-	*<code>UIEvent</code> 类用来定义UI组件类的事件类型。
-	*/
 	//class laya.ui.UIEvent extends laya.events.Event
 	var UIEvent=(function(_super){
 		function UIEvent(){UIEvent.__super.call(this);;
@@ -12007,144 +11767,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Event)
 
 
-	/**
-	*<p> <code>Sprite</code> 是基本的显示图形的显示列表节点。 <code>Sprite</code> 默认没有宽高，默认不接受鼠标事件。通过 <code>graphics</code> 可以绘制图片或者矢量图，支持旋转，缩放，位移等操作。<code>Sprite</code>同时也是容器类，可用来添加多个子节点。</p>
-	*<p>注意： <code>Sprite</code> 默认没有宽高，可以通过<code>getBounds</code>函数获取；也可手动设置宽高；还可以设置<code>autoSize=true</code>，然后再获取宽高。<code>Sprite</code>的宽高一般用于进行碰撞检测和排版，并不影响显示图像大小，如果需要更改显示图像大小，请使用 <code>scaleX</code> ， <code>scaleY</code> ， <code>scale</code>。</p>
-	*<p> <code>Sprite</code> 默认不接受鼠标事件，即<code>mouseEnabled=false</code>，但是只要对其监听任意鼠标事件，会自动打开自己以及所有父对象的<code>mouseEnabled=true</code>。所以一般也无需手动设置<code>mouseEnabled</code>。</p>
-	*<p>LayaAir引擎API设计精简巧妙。核心显示类只有一个<code>Sprite</code>。<code>Sprite</code>针对不同的情况做了渲染优化，所以保证一个类实现丰富功能的同时，又达到高性能。</p>
-	*
-	*@example <caption>创建了一个 <code>Sprite</code> 实例。</caption>
-	*package
-	*{
-		*import laya.display.Sprite;
-		*import laya.events.Event;
-		*
-		*public class Sprite_Example
-		*{
-			*private var sprite:Sprite;
-			*private var shape:Sprite
-			*public function Sprite_Example()
-			*{
-				*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-				*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-				*onInit();
-				*}
-			*private function onInit():void
-			*{
-				*sprite=new Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-				*sprite.loadImage("resource/ui/bg.png");//加载并显示图片。
-				*sprite.x=200;//设置 sprite 对象相对于父容器的水平方向坐标值。
-				*sprite.y=200;//设置 sprite 对象相对于父容器的垂直方向坐标值。
-				*sprite.pivotX=0;//设置 sprite 对象的水平方法轴心点坐标。
-				*sprite.pivotY=0;//设置 sprite 对象的垂直方法轴心点坐标。
-				*Laya.stage.addChild(sprite);//将此 sprite 对象添加到显示列表。
-				*sprite.on(Event.CLICK,this,onClickSprite);//给 sprite 对象添加点击事件侦听。
-				*shape=new Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-				*shape.graphics.drawRect(0,0,100,100,"#ccff00","#ff0000",2);//绘制一个有边框的填充矩形。
-				*shape.x=400;//设置 shape 对象相对于父容器的水平方向坐标值。
-				*shape.y=200;//设置 shape 对象相对于父容器的垂直方向坐标值。
-				*shape.width=100;//设置 shape 对象的宽度。
-				*shape.height=100;//设置 shape 对象的高度。
-				*shape.pivotX=50;//设置 shape 对象的水平方法轴心点坐标。
-				*shape.pivotY=50;//设置 shape 对象的垂直方法轴心点坐标。
-				*Laya.stage.addChild(shape);//将此 shape 对象添加到显示列表。
-				*shape.on(Event.CLICK,this,onClickShape);//给 shape 对象添加点击事件侦听。
-				*}
-			*private function onClickSprite():void
-			*{
-				*trace("点击 sprite 对象。");
-				*sprite.rotation+=5;//旋转 sprite 对象。
-				*}
-			*private function onClickShape():void
-			*{
-				*trace("点击 shape 对象。");
-				*shape.rotation+=5;//旋转 shape 对象。
-				*}
-			*}
-		*}
-	*
-	*@example
-	*var sprite;
-	*var shape;
-	*Sprite_Example();
-	*function Sprite_Example()
-	*{
-		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*onInit();
-		*}
-	*function onInit()
-	*{
-		*sprite=new laya.display.Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-		*sprite.loadImage("resource/ui/bg.png");//加载并显示图片。
-		*sprite.x=200;//设置 sprite 对象相对于父容器的水平方向坐标值。
-		*sprite.y=200;//设置 sprite 对象相对于父容器的垂直方向坐标值。
-		*sprite.pivotX=0;//设置 sprite 对象的水平方法轴心点坐标。
-		*sprite.pivotY=0;//设置 sprite 对象的垂直方法轴心点坐标。
-		*Laya.stage.addChild(sprite);//将此 sprite 对象添加到显示列表。
-		*sprite.on(Event.CLICK,this,onClickSprite);//给 sprite 对象添加点击事件侦听。
-		*shape=new laya.display.Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-		*shape.graphics.drawRect(0,0,100,100,"#ccff00","#ff0000",2);//绘制一个有边框的填充矩形。
-		*shape.x=400;//设置 shape 对象相对于父容器的水平方向坐标值。
-		*shape.y=200;//设置 shape 对象相对于父容器的垂直方向坐标值。
-		*shape.width=100;//设置 shape 对象的宽度。
-		*shape.height=100;//设置 shape 对象的高度。
-		*shape.pivotX=50;//设置 shape 对象的水平方法轴心点坐标。
-		*shape.pivotY=50;//设置 shape 对象的垂直方法轴心点坐标。
-		*Laya.stage.addChild(shape);//将此 shape 对象添加到显示列表。
-		*shape.on(laya.events.Event.CLICK,this,onClickShape);//给 shape 对象添加点击事件侦听。
-		*}
-	*function onClickSprite()
-	*{
-		*console.log("点击 sprite 对象。");
-		*sprite.rotation+=5;//旋转 sprite 对象。
-		*}
-	*function onClickShape()
-	*{
-		*console.log("点击 shape 对象。");
-		*shape.rotation+=5;//旋转 shape 对象。
-		*}
-	*
-	*@example
-	*import Sprite=laya.display.Sprite;
-	*class Sprite_Example {
-		*private sprite:Sprite;
-		*private shape:Sprite
-		*public Sprite_Example(){
-			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*this.onInit();
-			*}
-		*private onInit():void {
-			*this.sprite=new Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-			*this.sprite.loadImage("resource/ui/bg.png");//加载并显示图片。
-			*this.sprite.x=200;//设置 sprite 对象相对于父容器的水平方向坐标值。
-			*this.sprite.y=200;//设置 sprite 对象相对于父容器的垂直方向坐标值。
-			*this.sprite.pivotX=0;//设置 sprite 对象的水平方法轴心点坐标。
-			*this.sprite.pivotY=0;//设置 sprite 对象的垂直方法轴心点坐标。
-			*Laya.stage.addChild(this.sprite);//将此 sprite 对象添加到显示列表。
-			*this.sprite.on(laya.events.Event.CLICK,this,this.onClickSprite);//给 sprite 对象添加点击事件侦听。
-			*this.shape=new Sprite();//创建一个 Sprite 类的实例对象 sprite 。
-			*this.shape.graphics.drawRect(0,0,100,100,"#ccff00","#ff0000",2);//绘制一个有边框的填充矩形。
-			*this.shape.x=400;//设置 shape 对象相对于父容器的水平方向坐标值。
-			*this.shape.y=200;//设置 shape 对象相对于父容器的垂直方向坐标值。
-			*this.shape.width=100;//设置 shape 对象的宽度。
-			*this.shape.height=100;//设置 shape 对象的高度。
-			*this.shape.pivotX=50;//设置 shape 对象的水平方法轴心点坐标。
-			*this.shape.pivotY=50;//设置 shape 对象的垂直方法轴心点坐标。
-			*Laya.stage.addChild(this.shape);//将此 shape 对象添加到显示列表。
-			*this.shape.on(laya.events.Event.CLICK,this,this.onClickShape);//给 shape 对象添加点击事件侦听。
-			*}
-		*private onClickSprite():void {
-			*console.log("点击 sprite 对象。");
-			*this.sprite.rotation+=5;//旋转 sprite 对象。
-			*}
-		*private onClickShape():void {
-			*console.log("点击 shape 对象。");
-			*this.shape.rotation+=5;//旋转 shape 对象。
-			*}
-		*}
-	*/
 	//class laya.display.Sprite extends laya.display.Node
 	var Sprite=(function(_super){
 		function Sprite(){
@@ -13458,10 +13080,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Node)
 
 
-	/**
-	*@private
-	*<code>Bitmap</code> 是图片资源类。
-	*/
 	//class laya.resource.Bitmap extends laya.resource.Resource
 	var Bitmap=(function(_super){
 		function Bitmap(){
@@ -13501,10 +13119,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Resource)
 
 
-	/**
-	*@private
-	*audio标签播放声音的音轨控制
-	*/
 	//class laya.media.h5audio.AudioSoundChannel extends laya.media.SoundChannel
 	var AudioSoundChannel=(function(_super){
 		function AudioSoundChannel(audio){
@@ -13650,10 +13264,6 @@ var Laya=window.Laya=(function(window,document){
 	})(SoundChannel)
 
 
-	/**
-	*@private
-	*web audio api方式播放声音的音轨控制
-	*/
 	//class laya.media.webaudio.WebAudioSoundChannel extends laya.media.SoundChannel
 	var WebAudioSoundChannel=(function(_super){
 		function WebAudioSoundChannel(){
@@ -13818,91 +13428,222 @@ var Laya=window.Laya=(function(window,document){
 
 
 	/**
-	*<p> <code>Text</code> 类用于创建显示对象以显示文本。</p>
-	*<p>
-	*注意：如果运行时系统找不到设定的字体，则用系统默认的字体渲染文字，从而导致显示异常。(通常电脑上显示正常，在一些移动端因缺少设置的字体而显示异常)。
-	*</p>
-	*@example
-	*package
-	*{
-		*import laya.display.Text;
-		*public class Text_Example
-		*{
-			*public function Text_Example()
-			*{
-				*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-				*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-				*onInit();
-				*}
-			*private function onInit():void
-			*{
-				*var text:Text=new Text();//创建一个 Text 类的实例对象 text 。
-				*text.text="这个是一个 Text 文本示例。";
-				*text.color="#008fff";//设置 text 的文本颜色。
-				*text.font="Arial";//设置 text 的文本字体。
-				*text.bold=true;//设置 text 的文本显示为粗体。
-				*text.fontSize=30;//设置 text 的字体大小。
-				*text.wordWrap=true;//设置 text 的文本自动换行。
-				*text.x=100;//设置 text 对象的属性 x 的值，用于控制 text 对象的显示位置。
-				*text.y=100;//设置 text 对象的属性 y 的值，用于控制 text 对象的显示位置。
-				*text.width=300;//设置 text 的宽度。
-				*text.height=200;//设置 text 的高度。
-				*text.italic=true;//设置 text 的文本显示为斜体。
-				*text.borderColor="#fff000";//设置 text 的文本边框颜色。
-				*Laya.stage.addChild(text);//将 text 添加到显示列表。
-				*}
-			*}
-		*}
-	*@example
-	*Text_Example();
-	*function Text_Example()
-	*{
-		*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-		*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-		*onInit();
-		*}
-	*function onInit()
-	*{
-		*var text=new laya.display.Text();//创建一个 Text 类的实例对象 text 。
-		*text.text="这个是一个 Text 文本示例。";
-		*text.color="#008fff";//设置 text 的文本颜色。
-		*text.font="Arial";//设置 text 的文本字体。
-		*text.bold=true;//设置 text 的文本显示为粗体。
-		*text.fontSize=30;//设置 text 的字体大小。
-		*text.wordWrap=true;//设置 text 的文本自动换行。
-		*text.x=100;//设置 text 对象的属性 x 的值，用于控制 text 对象的显示位置。
-		*text.y=100;//设置 text 对象的属性 y 的值，用于控制 text 对象的显示位置。
-		*text.width=300;//设置 text 的宽度。
-		*text.height=200;//设置 text 的高度。
-		*text.italic=true;//设置 text 的文本显示为斜体。
-		*text.borderColor="#fff000";//设置 text 的文本边框颜色。
-		*Laya.stage.addChild(text);//将 text 添加到显示列表。
-		*}
-	*@example
-	*class Text_Example {
-		*constructor(){
-			*Laya.init(640,800);//设置游戏画布宽高、渲染模式。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*this.onInit();
-			*}
-		*private onInit():void {
-			*var text:laya.display.Text=new laya.display.Text();//创建一个 Text 类的实例对象 text 。
-			*text.text="这个是一个 Text 文本示例。";
-			*text.color="#008fff";//设置 text 的文本颜色。
-			*text.font="Arial";//设置 text 的文本字体。
-			*text.bold=true;//设置 text 的文本显示为粗体。
-			*text.fontSize=30;//设置 text 的字体大小。
-			*text.wordWrap=true;//设置 text 的文本自动换行。
-			*text.x=100;//设置 text 对象的属性 x 的值，用于控制 text 对象的显示位置。
-			*text.y=100;//设置 text 对象的属性 y 的值，用于控制 text 对象的显示位置。
-			*text.width=300;//设置 text 的宽度。
-			*text.height=200;//设置 text 的高度。
-			*text.italic=true;//设置 text 的文本显示为斜体。
-			*text.borderColor="#fff000";//设置 text 的文本边框颜色。
-			*Laya.stage.addChild(text);//将 text 添加到显示列表。
-			*}
-		*}
+	*...滚动容器 实现基本的拖动滚动，回弹效果
+	*@author ...Kanon
 	*/
+	//class components.ScorllContainer extends laya.display.Sprite
+	var ScorllContainer=(function(_super){
+		function ScorllContainer(){
+			this.content=null;
+			this.maskSpt=null;
+			this._isHorizontal=false;
+			this.viewWidth=100;
+			this.viewHeight=100;
+			this._gap=0;
+			this.contentList=null;
+			this.isTouched=false;
+			this.touchPos=null;
+			this.contentPos=null;
+			this._isBounce=false;
+			this.bounceDuration=0;
+			this.tween=null;
+			ScorllContainer.__super.call(this);
+			this.init();
+			this.initEvent();
+		}
+
+		__class(ScorllContainer,'components.ScorllContainer',_super);
+		var __proto=ScorllContainer.prototype;
+		/**
+		*初始化
+		*/
+		__proto.init=function(){
+			this.content=new Sprite();
+			this.addChild(this.content);
+			this.maskSpt=new Sprite();
+			this.mask=this.maskSpt;
+			this.setViewSize(this.viewWidth,this.viewHeight);
+			this.bounceDuration=400;
+			this.isBounce=true;
+			this.contentList=[];
+			this.touchPos=new Point();
+			this.contentPos=new Point();
+		}
+
+		/**
+		*初始化事件
+		*/
+		__proto.initEvent=function(){
+			this.on("mousedown",this,this.contentMouseDownHandler);
+			Laya.stage.on("mouseup",this,this.contentMouseUpHandler);
+			Laya.stage.on("mouseout",this,this.contentMouseUpHandler);
+			this.frameLoop(1,this,this.loopHandler)
+		}
+
+		/**
+		*更新内容的显示大小
+		*/
+		__proto.updateContentView=function(){
+			var pos=0;
+			for (var i=0;i < this.contentList.length;i++){
+				var node=this.contentList[i];
+				if (!this._isHorizontal){
+					node.x=0;
+					node.y=pos;
+					if(i < this.contentList.length-1)
+						pos+=node.height+this._gap;
+					else
+					pos+=node.height;
+				}
+				else{
+					node.x=pos;
+					node.y=0;
+					if(i < this.contentList.length-1)
+						pos+=node.width+this._gap;
+					else
+					pos+=node.width;
+				}
+			}
+			if (this._isHorizontal){
+				this.content.width=pos;
+				this.content.height=this.viewHeight;
+			}
+			else{
+				this.content.width=this.viewWidth;
+				this.content.height=pos;
+			}
+			this.debugDrawContentBound();
+		}
+
+		/**
+		*用于调试绘制内容的范围
+		*/
+		__proto.debugDrawContentBound=function(){
+			this.content.graphics.clear(true);
+			this.content.graphics.drawRect(this.content.x,this.content.y,this.content.width,this.content.height,null,"#ff00ff");
+			this.graphics.clear(true);
+			this.graphics.drawRect(0,0,this.width,this.height,null,"#ffff00");
+		}
+
+		/**
+		*添加到内容容器中
+		*@param node 显示对象
+		*/
+		__proto.addNode=function(node){
+			this.content.addChild(node);
+			this.contentList.push(node);
+			this.updateContentView();
+		}
+
+		/**
+		*根据索引删除节点
+		*@param index 索引
+		*/
+		__proto.removeNodeByIndex=function(index){
+			if (index < 0 || index > this.contentList.length-1)return;
+			this.contentList.splice(index,1);
+			this.updateContentView();
+		}
+
+		/**
+		*删除所有子对象
+		*/
+		__proto.removeAllChild=function(){
+			var count=this.contentList.length;
+			for (var i=count-1;i >=0;--i){
+				var node=this.contentList[i];
+				node.removeSelf();
+				this.contentList.splice(i,1);
+			}
+		}
+
+		/**
+		*设置显示区域大小
+		*@param width 宽度
+		*@param height 高度
+		*/
+		__proto.setViewSize=function(width,height){
+			this.viewWidth=width;
+			this.viewHeight=height;
+			this.width=width;
+			this.height=height;
+			if (this.maskSpt){
+				this.maskSpt.graphics.clear(true);
+				this.maskSpt.graphics.drawRect(0,0,this.viewWidth,this.viewHeight,"#000000");
+			}
+			this.debugDrawContentBound();
+		}
+
+		/**
+		*回弹
+		*/
+		__proto.bounce=function(){
+			if (this.tween)this.tween.clear();
+			if (!this._isHorizontal){
+				if (this.content.y > 0)
+					this.tween=Tween.to(this.content,{y :0 },this.bounceDuration,Ease.circOut);
+				else if (this.content.y < this.viewHeight-this.content.height)
+				this.tween=Tween.to(this.content,{y :this.viewHeight-this.content.height },this.bounceDuration,Ease.circOut);
+			}
+			else{
+			}
+		}
+
+		__proto.contentMouseDownHandler=function(){
+			this.isTouched=true;
+			if (this.tween)
+				this.tween.clear();
+			this.touchPos.x=MouseManager.instance.mouseX;
+			this.touchPos.y=MouseManager.instance.mouseY;
+			this.contentPos.x=this.content.x;
+			this.contentPos.y=this.content.y;
+		}
+
+		__proto.contentMouseUpHandler=function(){
+			this.isTouched=false;
+			this.bounce();
+		}
+
+		__proto.loopHandler=function(){
+			if (this.isTouched){
+				if (!this.isHorizontal){
+					this.content.y=this.contentPos.y+(MouseManager.instance.mouseY-this.touchPos.y)/ 1.5;
+					if (!this.isBounce){
+						if (this.content.y > 0)this.content.y=0;
+						else if (this.content.y < this.viewHeight-this.content.height)this.content.y=this.viewHeight-this.content.height;
+					}
+				}
+				else{
+				}
+			}
+		}
+
+		/**
+		*是否横向滚动
+		*/
+		__getset(0,__proto,'isHorizontal',function(){return this._isHorizontal;},function(value){
+			this._isHorizontal=value;
+			this.updateContentView();
+		});
+
+		/**
+		*间隔
+		*/
+		__getset(0,__proto,'gap',function(){return this._gap;},function(value){
+			this._gap=value;
+		});
+
+		/**
+		*设置是否有回弹
+		*/
+		__getset(0,__proto,'isBounce',function(){return this._isBounce;},function(value){
+			this._isBounce=value;
+		});
+
+		return ScorllContainer;
+	})(Sprite)
+
+
 	//class laya.display.Text extends laya.display.Sprite
 	var Text=(function(_super){
 		function Text(){
@@ -14678,10 +14419,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Sprite)
 
 
-	/**
-	*<code>Component</code> 是ui控件类的基类。
-	*<p>生命周期：preinitialize > createChildren > initialize > 组件构造函数</p>
-	*/
 	//class laya.ui.Component extends laya.display.Sprite
 	var Component=(function(_super){
 		function Component(){
@@ -15165,11 +14902,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Sprite)
 
 
-	/**
-	*<p> <code>Stage</code> 是舞台类，显示列表的根节点，所有显示对象都在舞台上显示。通过 Laya.stage 单例访问。</p>
-	*<p>Stage提供几种适配模式，不同的适配模式会产生不同的画布大小，画布越大，渲染压力越大，所以要选择合适的适配方案。</p>
-	*<p>Stage提供不同的帧率模式，帧率越高，渲染压力越大，越费电，合理使用帧率甚至动态更改帧率有利于改进手机耗电。</p>
-	*/
 	//class laya.display.Stage extends laya.display.Sprite
 	var Stage=(function(_super){
 		function Stage(){
@@ -15743,10 +15475,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Sprite)
 
 
-	/**
-	*@private
-	*<code>FileBitmap</code> 是图片文件资源类。
-	*/
 	//class laya.resource.FileBitmap extends laya.resource.Bitmap
 	var FileBitmap=(function(_super){
 		function FileBitmap(){
@@ -15783,9 +15511,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Bitmap)
 
 
-	/**
-	*<code>HTMLCanvas</code> 是 Html Canvas 的代理类，封装了 Canvas 的属性和方法。。请不要直接使用 new HTMLCanvas！
-	*/
 	//class laya.resource.HTMLCanvas extends laya.resource.Bitmap
 	var HTMLCanvas=(function(_super){
 		function HTMLCanvas(type){
@@ -15904,10 +15629,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Bitmap)
 
 
-	/**
-	*<p><code>Input</code> 类用于创建显示对象以显示和输入文本。</p>
-	*<p>Input 类封装了原生的文本输入框，由于不同浏览器的差异，会导致此对象的默认文本的位置与用户点击输入时的文本的位置有少许的偏差。</p>
-	*/
 	//class laya.display.Input extends laya.display.Text
 	var Input=(function(_super){
 		function Input(){
@@ -16369,78 +16090,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Text)
 
 
-	/**
-	*<code>Image</code> 类是用于表示位图图像或绘制图形的显示对象。
-	*Image和Clip组件是唯一支持异步加载的两个组件，比如img.skin="abc/xxx.png"，其他UI组件均不支持异步加载。
-	*
-	*@example <caption>以下示例代码，创建了一个新的 <code>Image</code> 实例，设置了它的皮肤、位置信息，并添加到舞台上。</caption>
-	*package
-	*{
-		*import laya.ui.Image;
-		*public class Image_Example
-		*{
-			*public function Image_Example()
-			*{
-				*Laya.init(640,800);//设置游戏画布宽高。
-				*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-				*onInit();
-				*}
-			*private function onInit():void
-			*{
-				*var bg:Image=new Image("resource/ui/bg.png");//创建一个 Image 类的实例对象 bg ,并传入它的皮肤。
-				*bg.x=100;//设置 bg 对象的属性 x 的值，用于控制 bg 对象的显示位置。
-				*bg.y=100;//设置 bg 对象的属性 y 的值，用于控制 bg 对象的显示位置。
-				*bg.sizeGrid="40,10,5,10";//设置 bg 对象的网格信息。
-				*bg.width=150;//设置 bg 对象的宽度。
-				*bg.height=250;//设置 bg 对象的高度。
-				*Laya.stage.addChild(bg);//将此 bg 对象添加到显示列表。
-				*var image:Image=new Image("resource/ui/image.png");//创建一个 Image 类的实例对象 image ,并传入它的皮肤。
-				*image.x=100;//设置 image 对象的属性 x 的值，用于控制 image 对象的显示位置。
-				*image.y=100;//设置 image 对象的属性 y 的值，用于控制 image 对象的显示位置。
-				*Laya.stage.addChild(image);//将此 image 对象添加到显示列表。
-				*}
-			*}
-		*}
-	*@example
-	*Laya.init(640,800);//设置游戏画布宽高
-	*Laya.stage.bgColor="#efefef";//设置画布的背景颜色
-	*onInit();
-	*function onInit(){
-		*var bg=new laya.ui.Image("resource/ui/bg.png");//创建一个 Image 类的实例对象 bg ,并传入它的皮肤。
-		*bg.x=100;//设置 bg 对象的属性 x 的值，用于控制 bg 对象的显示位置。
-		*bg.y=100;//设置 bg 对象的属性 y 的值，用于控制 bg 对象的显示位置。
-		*bg.sizeGrid="40,10,5,10";//设置 bg 对象的网格信息。
-		*bg.width=150;//设置 bg 对象的宽度。
-		*bg.height=250;//设置 bg 对象的高度。
-		*Laya.stage.addChild(bg);//将此 bg 对象添加到显示列表。
-		*var image=new laya.ui.Image("resource/ui/image.png");//创建一个 Image 类的实例对象 image ,并传入它的皮肤。
-		*image.x=100;//设置 image 对象的属性 x 的值，用于控制 image 对象的显示位置。
-		*image.y=100;//设置 image 对象的属性 y 的值，用于控制 image 对象的显示位置。
-		*Laya.stage.addChild(image);//将此 image 对象添加到显示列表。
-		*}
-	*@example
-	*class Image_Example {
-		*constructor(){
-			*Laya.init(640,800);//设置游戏画布宽高。
-			*Laya.stage.bgColor="#efefef";//设置画布的背景颜色。
-			*this.onInit();
-			*}
-		*private onInit():void {
-			*var bg:laya.ui.Image=new laya.ui.Image("resource/ui/bg.png");//创建一个 Image 类的实例对象 bg ,并传入它的皮肤。
-			*bg.x=100;//设置 bg 对象的属性 x 的值，用于控制 bg 对象的显示位置。
-			*bg.y=100;//设置 bg 对象的属性 y 的值，用于控制 bg 对象的显示位置。
-			*bg.sizeGrid="40,10,5,10";//设置 bg 对象的网格信息。
-			*bg.width=150;//设置 bg 对象的宽度。
-			*bg.height=250;//设置 bg 对象的高度。
-			*Laya.stage.addChild(bg);//将此 bg 对象添加到显示列表。
-			*var image:laya.ui.Image=new laya.ui.Image("resource/ui/image.png");//创建一个 Image 类的实例对象 image ,并传入它的皮肤。
-			*image.x=100;//设置 image 对象的属性 x 的值，用于控制 image 对象的显示位置。
-			*image.y=100;//设置 image 对象的属性 y 的值，用于控制 image 对象的显示位置。
-			*Laya.stage.addChild(image);//将此 image 对象添加到显示列表。
-			*}
-		*}
-	*@see laya.ui.AutoBitmap
-	*/
 	//class laya.ui.Image extends laya.ui.Component
 	var Image=(function(_super){
 		function Image(skin){
@@ -16576,11 +16225,6 @@ var Laya=window.Laya=(function(window,document){
 	})(Component)
 
 
-	/**
-	*@private
-	*<p> <code>HTMLImage</code> 用于创建 HTML Image 元素。</p>
-	*<p>请使用 <code>HTMLImage.create()<code>获取新实例，不要直接使用 <code>new HTMLImage<code> 。</p>
-	*/
 	//class laya.resource.HTMLImage extends laya.resource.FileBitmap
 	var HTMLImage=(function(_super){
 		function HTMLImage(src,def){
@@ -16685,7 +16329,7 @@ var Laya=window.Laya=(function(window,document){
 	})(FileBitmap)
 
 
-	Laya.__init([LoaderManager,EventDispatcher,Timer,Render,Browser,LocalStorage]);
+	Laya.__init([Timer,LoaderManager,EventDispatcher,Render,Browser,LocalStorage]);
 	new Test();
 
 })(window,document,Laya);

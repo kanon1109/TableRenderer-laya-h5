@@ -1,0 +1,19 @@
+1,0.00,,0,Project command:f:\workspace\kanon\myProject\html5\laya\TableRenderer-laya-h5/.actionScriptProperties;iflash=false;windowshow=false;chromerun=false;quickcompile=true
+Project configuration:f:\workspace\kanon\myProject\html5\laya\TableRenderer-laya-h5/.actionScriptProperties.
+1,0.00,,0,output path:f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/
+1,0.00,,0,Main Class:f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/src/Test.as
+1,0.00,,0,output file:Test
+1,0.00,,0,compilerSourcePath f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/libs/laya/src/
+
+1,0.00,,0,Compile Path:f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/src/
+
+1,0.00,,0,Compile Path:f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/libs/laya/src/
+
+1,0.00,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/src,0,Collect
+1,0.00,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/libs/laya/src,0,Collect
+1,2.00,,0,read class message
+1,89.71,,0,Disable Flash3D f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/src/Test.as
+12,89.71,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/Test.max.js,486048,
+11,89.71,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/Test.max.html,887,
+******************************************************************************
+14,89.71,,0,
