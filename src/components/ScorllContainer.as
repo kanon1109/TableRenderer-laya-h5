@@ -4,6 +4,7 @@ import laya.display.Sprite;
 import laya.events.Event;
 import laya.events.MouseManager;
 import laya.maths.Point;
+import laya.maths.Rectangle;
 import laya.utils.Ease;
 import laya.utils.Tween;
 /**
@@ -13,7 +14,6 @@ import laya.utils.Tween;
 public class ScorllContainer extends Sprite 
 {
 	protected var content:Sprite;
-	protected var maskSpt:Sprite;
 	//是否横向
 	protected var _isHorizontal:Boolean;
 	//可显示的大小
@@ -30,32 +30,49 @@ public class ScorllContainer extends Sprite
 	protected var contentPos:Point;
 	//释放后是否有弹性效果
 	protected var _isBounce:Boolean;
-	//回弹时间
-	protected var bounceDuration:int;
 	//动画
 	protected var tween:Tween;
+	//是否显示调试模式
+	private var isDebug:Boolean;
+	//回弹时间
+	private var bounceDuration:int;
+	//速度
+	private var speed:Number;
+	//运动摩擦力
+	private var friction:Number;
+	//上一次鼠标位置
+	private var prevMousePos:Point;
 	public function ScorllContainer() 
 	{
-		this.init();
+		this.initData();
+		this.initUI();
 		this.initEvent();
 	}
 	
 	/**
-	 * 初始化
+	 * 初始化数据
 	 */
-	protected function init():void
+	protected function initData():void
 	{
-		this.content = new Sprite();
-		this.addChild(this.content);
-		this.maskSpt = new Sprite();
-		this.mask = this.maskSpt;
-		this.setViewSize(this.viewWidth, this.viewHeight);
-		
+		this.speed = 0;
+		this.friction = .95;
 		this.bounceDuration = 400;
 		this.isBounce = true;
+		this.optimizeScrollRect = true;
 		this.contentList = [];
 		this.touchPos = new Point();
 		this.contentPos = new Point();
+		this.prevMousePos = new Point();
+	}
+	
+	/**
+	 * 初始化UI
+	 */
+	protected function initUI():void
+	{
+		this.content = new Sprite();
+		this.addChild(this.content);
+		this.setViewSize(this.viewWidth, this.viewHeight);
 	}
 	
 	/**
@@ -64,6 +81,7 @@ public class ScorllContainer extends Sprite
 	protected function initEvent():void
 	{
 		this.on(Event.MOUSE_DOWN, this, contentMouseDownHandler);
+		this.on(Event.MOUSE_UP, this, contentMouseUpHandler);
 		Laya.stage.on(Event.MOUSE_UP, this, contentMouseUpHandler);
 		Laya.stage.on(Event.MOUSE_OUT, this, contentMouseUpHandler);
 		this.frameLoop(1, this, loopHandler)
@@ -72,7 +90,7 @@ public class ScorllContainer extends Sprite
 	/**
 	 * 更新内容的显示大小
 	 */
-	public function updateContentView():void
+	public function updateContentSize():void
 	{
 		var pos:Number = 0;
 		for (var i:int = 0; i < this.contentList.length; i++) 
@@ -130,7 +148,7 @@ public class ScorllContainer extends Sprite
 	{
 		this.content.addChild(node);
 		this.contentList.push(node); 
-		this.updateContentView();
+		this.updateContentSize();
 	}
 	
 	/**
@@ -141,7 +159,7 @@ public class ScorllContainer extends Sprite
 	{
 		if (index < 0 || index > this.contentList.length - 1) return;
 		this.contentList.splice(index, 1);
-		this.updateContentView();
+		this.updateContentSize();
 	}
 	
 	/**
@@ -169,11 +187,7 @@ public class ScorllContainer extends Sprite
 		this.viewHeight = height;
 		this.width = width;
 		this.height = height;
-		if (this.maskSpt)
-		{
-			this.maskSpt.graphics.clear(true);
-			this.maskSpt.graphics.drawRect(0, 0, this.viewWidth, this.viewHeight, "#000000");
-		}
+		this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
 		this.debugDrawContentBound();
 	}
 	
@@ -182,20 +196,35 @@ public class ScorllContainer extends Sprite
 	 */
 	private function bounce():void
 	{
-		if (this.tween) this.tween.clear();
 		if (!this._isHorizontal)
 		{
 			if (this.content.y > 0)
+			{
+				this.speed = 0;
+				if (this.tween) this.tween.clear();
 				this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
+			}
 			else if (this.content.y < this.viewHeight - this.content.height)
+			{
+				this.speed = 0;
+				if (this.tween) this.tween.clear();
 				this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
+			}
 		}
 		else
 		{
 			if (this.content.x > 0)
+			{
+				this.speed = 0;
+				if (this.tween) this.tween.clear();
 				this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
+			}
 			else if (this.content.x < this.viewWidth - this.content.width)
+			{
+				this.speed = 0;
+				if (this.tween) this.tween.clear();
 				this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
+			}
 		}
 	}
 	
@@ -206,7 +235,7 @@ public class ScorllContainer extends Sprite
 	public function set isHorizontal(value:Boolean):void 
 	{
 		_isHorizontal = value;
-		this.updateContentView();
+		this.updateContentSize();
 	}
 	
 	/**
@@ -227,27 +256,51 @@ public class ScorllContainer extends Sprite
 		_isBounce = value;
 	}
 	
+	//------点击事件--------
 	private function contentMouseDownHandler():void 
 	{
 		this.isTouched = true;
 		if (this.tween) this.tween.clear();
 		this.touchPos.x = MouseManager.instance.mouseX;
 		this.touchPos.y = MouseManager.instance.mouseY;
+		this.prevMousePos.x = this.touchPos.x;
+		this.prevMousePos.y = this.touchPos.y;
 		this.contentPos.x = this.content.x;
 		this.contentPos.y = this.content.y;
 	}
 	
 	private function contentMouseUpHandler():void 
 	{
+		this.updateTouchSpeed();
 		this.isTouched = false;
-		this.bounce();
+		//this.bounce();
 	}
 	
-	private function loopHandler():void 
+	/**
+	 * 更新拖动速度
+	 */
+	private function updateTouchSpeed():void
 	{
 		if (this.isTouched)
 		{
-			if (!this.isHorizontal)
+			if (!this._isHorizontal)
+				this.speed = MouseManager.instance.mouseY - this.prevMousePos.y;
+			else
+				this.speed = MouseManager.instance.mouseX - this.prevMousePos.x;
+		}
+		this.prevMousePos.x = MouseManager.instance.mouseX;
+		this.prevMousePos.y = MouseManager.instance.mouseY;
+		this.speed *= this.friction;
+		if (Math.abs(this.speed) < .1) this.speed = 0;
+	}
+	
+	//帧循环
+	protected function loopHandler():void 
+	{
+		this.updateTouchSpeed();
+		if (this.isTouched)
+		{
+			if (!this._isHorizontal)
 			{
 				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y) / 1.5;
 				if (!this.isBounce)
@@ -265,6 +318,13 @@ public class ScorllContainer extends Sprite
 					else if (this.content.x < this.viewWidth - this.content.width) this.content.x = this.viewWidth - this.content.width;
 				}
 			}
+		}
+		else
+		{
+			if (!this._isHorizontal)
+				this.content.y += this.speed;
+			else
+				this.content.x += this.speed;
 		}
 	}
 }
