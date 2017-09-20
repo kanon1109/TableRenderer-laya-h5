@@ -55,9 +55,10 @@ public class ScorllContainer extends Sprite
 	protected function initData():void
 	{
 		this.speed = 0;
-		this.friction = .95;
+		this.friction = .96;
 		this.bounceDuration = 400;
 		this.isBounce = true;
+		this.isTouched = false;
 		this.optimizeScrollRect = true;
 		this.contentList = [];
 		this.touchPos = new Point();
@@ -196,34 +197,35 @@ public class ScorllContainer extends Sprite
 	 */
 	private function bounce():void
 	{
+		if (this.isTouched || !this.isBounce) return;
 		if (!this._isHorizontal)
 		{
+			if (this.content.height == 0) return;
 			if (this.content.y > 0)
 			{
+				trace("in1")
 				this.speed = 0;
-				if (this.tween) this.tween.clear();
-				this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
+				if (!this.tween) this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
 			}
 			else if (this.content.y < this.viewHeight - this.content.height)
 			{
+				trace("in")
 				this.speed = 0;
-				if (this.tween) this.tween.clear();
-				this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
+				if (!this.tween) this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
 			}
 		}
 		else
-		{
+	{
+			if (this.content.width == 0) return;
 			if (this.content.x > 0)
 			{
 				this.speed = 0;
-				if (this.tween) this.tween.clear();
-				this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
+				if (!this.tween) this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
 			}
 			else if (this.content.x < this.viewWidth - this.content.width)
 			{
 				this.speed = 0;
-				if (this.tween) this.tween.clear();
-				this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
+				if (!this.tween) this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
 			}
 		}
 	}
@@ -260,7 +262,11 @@ public class ScorllContainer extends Sprite
 	private function contentMouseDownHandler():void 
 	{
 		this.isTouched = true;
-		if (this.tween) this.tween.clear();
+		if (this.tween)
+		{
+			this.tween.clear();
+			this.tween = null;
+		}
 		this.touchPos.x = MouseManager.instance.mouseX;
 		this.touchPos.y = MouseManager.instance.mouseY;
 		this.prevMousePos.x = this.touchPos.x;
@@ -273,7 +279,6 @@ public class ScorllContainer extends Sprite
 	{
 		this.updateTouchSpeed();
 		this.isTouched = false;
-		//this.bounce();
 	}
 	
 	/**
@@ -298,6 +303,7 @@ public class ScorllContainer extends Sprite
 	protected function loopHandler():void 
 	{
 		this.updateTouchSpeed();
+		this.bounce();
 		if (this.isTouched)
 		{
 			if (!this._isHorizontal)

@@ -13468,9 +13468,10 @@ var Laya=window.Laya=(function(window,document){
 		*/
 		__proto.initData=function(){
 			this.speed=0;
-			this.friction=.95;
+			this.friction=.96;
 			this.bounceDuration=400;
 			this.isBounce=true;
+			this.isTouched=false;
 			this.optimizeScrollRect=true;
 			this.contentList=[];
 			this.touchPos=new Point();
@@ -13593,28 +13594,29 @@ var Laya=window.Laya=(function(window,document){
 		*回弹
 		*/
 		__proto.bounce=function(){
+			if (this.isTouched || !this.isBounce)return;
 			if (!this._isHorizontal){
+				if (this.content.height==0)return;
 				if (this.content.y > 0){
+					console.log("in1")
 					this.speed=0;
-					if (this.tween)this.tween.clear();
-					this.tween=Tween.to(this.content,{y :0 },this.bounceDuration,Ease.circOut);
+					if (!this.tween)this.tween=Tween.to(this.content,{y :0 },this.bounceDuration,Ease.circOut);
 				}
 				else if (this.content.y < this.viewHeight-this.content.height){
+					console.log("in")
 					this.speed=0;
-					if (this.tween)this.tween.clear();
-					this.tween=Tween.to(this.content,{y :this.viewHeight-this.content.height },this.bounceDuration,Ease.circOut);
+					if (!this.tween)this.tween=Tween.to(this.content,{y :this.viewHeight-this.content.height },this.bounceDuration,Ease.circOut);
 				}
 			}
 			else{
+				if (this.content.width==0)return;
 				if (this.content.x > 0){
 					this.speed=0;
-					if (this.tween)this.tween.clear();
-					this.tween=Tween.to(this.content,{x :0 },this.bounceDuration,Ease.circOut);
+					if (!this.tween)this.tween=Tween.to(this.content,{x :0 },this.bounceDuration,Ease.circOut);
 				}
 				else if (this.content.x < this.viewWidth-this.content.width){
 					this.speed=0;
-					if (this.tween)this.tween.clear();
-					this.tween=Tween.to(this.content,{x :this.viewWidth-this.content.width },this.bounceDuration,Ease.circOut);
+					if (!this.tween)this.tween=Tween.to(this.content,{x :this.viewWidth-this.content.width },this.bounceDuration,Ease.circOut);
 				}
 			}
 		}
@@ -13622,7 +13624,10 @@ var Laya=window.Laya=(function(window,document){
 		//------点击事件--------
 		__proto.contentMouseDownHandler=function(){
 			this.isTouched=true;
-			if (this.tween)this.tween.clear();
+			if (this.tween){
+				this.tween.clear();
+				this.tween=null;
+			}
 			this.touchPos.x=MouseManager.instance.mouseX;
 			this.touchPos.y=MouseManager.instance.mouseY;
 			this.prevMousePos.x=this.touchPos.x;
@@ -13634,7 +13639,6 @@ var Laya=window.Laya=(function(window,document){
 		__proto.contentMouseUpHandler=function(){
 			this.updateTouchSpeed();
 			this.isTouched=false;
-			this.bounce();
 		}
 
 		/**
@@ -13651,19 +13655,12 @@ var Laya=window.Laya=(function(window,document){
 			this.prevMousePos.y=MouseManager.instance.mouseY;
 			this.speed *=this.friction;
 			if (Math.abs(this.speed)<.1)this.speed=0;
-			if (!this._isHorizontal){
-				if (this.content.y > 0 || this.content.y < this.viewHeight-this.content.height)
-					this.speed *=.2;
-			}
-			else{
-				if (this.content.x > 0 || this.content.x < this.viewWidth-this.content.width)
-					this.speed *=.2;
-			}
 		}
 
 		//帧循环
 		__proto.loopHandler=function(){
 			this.updateTouchSpeed();
+			this.bounce();
 			if (this.isTouched){
 				if (!this._isHorizontal){
 					this.content.y=this.contentPos.y+(MouseManager.instance.mouseY-this.touchPos.y)/ 1.5;
