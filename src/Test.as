@@ -44,13 +44,13 @@ public class Test
 	private function loadImgComplete():void
 	{
 		this.scroll.x = 300;
-		this.scroll.y = 20;
+		this.scroll.y = 100;
 		for (var i:int = 0; i < 15; i++) 
 		{
 			var img:Image = new Image("res/bg.png");
 			this.scroll.addNode(img);
 		}
-		//this.scroll.isHorizontal = true;
+		this.scroll.isHorizontal = true;
 		Laya.stage.on(Event.CLICK, this, clickHandler);
 		Laya.stage.on(Event.MOUSE_DOWN, this, stageMouseDownHandler);
 		Laya.stage.on(Event.MOUSE_UP, this, stageMouseUpHandler);

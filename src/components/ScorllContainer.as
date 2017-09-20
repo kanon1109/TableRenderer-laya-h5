@@ -55,7 +55,7 @@ public class ScorllContainer extends Sprite
 	protected function initData():void
 	{
 		this.speed = 0;
-		this.friction = .96;
+		this.friction = .98;
 		this.bounceDuration = 400;
 		this.isBounce = true;
 		this.isTouched = false;
@@ -203,19 +203,17 @@ public class ScorllContainer extends Sprite
 			if (this.content.height == 0) return;
 			if (this.content.y > 0)
 			{
-				trace("in1")
 				this.speed = 0;
 				if (!this.tween) this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
 			}
 			else if (this.content.y < this.viewHeight - this.content.height)
 			{
-				trace("in")
 				this.speed = 0;
 				if (!this.tween) this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
 			}
 		}
 		else
-	{
+		{
 			if (this.content.width == 0) return;
 			if (this.content.x > 0)
 			{
@@ -277,14 +275,14 @@ public class ScorllContainer extends Sprite
 	
 	private function contentMouseUpHandler():void 
 	{
-		this.updateTouchSpeed();
+		this.updateScrollSpeed();
 		this.isTouched = false;
 	}
 	
 	/**
-	 * 更新拖动速度
+	 * 更新滚动速度
 	 */
-	private function updateTouchSpeed():void
+	private function updateScrollSpeed():void
 	{
 		if (this.isTouched)
 		{
@@ -299,16 +297,16 @@ public class ScorllContainer extends Sprite
 		if (Math.abs(this.speed) < .1) this.speed = 0;
 	}
 	
-	//帧循环
-	protected function loopHandler():void 
+	/**
+	 * 更新位置
+	 */
+	protected function updatePos():void
 	{
-		this.updateTouchSpeed();
-		this.bounce();
 		if (this.isTouched)
 		{
 			if (!this._isHorizontal)
 			{
-				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y) / 1.5;
+				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y) ;
 				if (!this.isBounce)
 				{
 					if (this.content.y > 0) this.content.y = 0;
@@ -317,7 +315,7 @@ public class ScorllContainer extends Sprite
 			}
 			else
 			{
-				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x) / 1.5;
+				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x) ;
 				if (!this.isBounce)
 				{
 					if (this.content.x > 0) this.content.x = 0;
@@ -332,6 +330,14 @@ public class ScorllContainer extends Sprite
 			else
 				this.content.x += this.speed;
 		}
+	}
+	
+	//帧循环
+	protected function loopHandler():void 
+	{
+		this.updateScrollSpeed();
+		this.bounce();
+		this.updatePos();
 	}
 }
 }
