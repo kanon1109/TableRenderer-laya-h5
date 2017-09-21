@@ -1,2 +1,4 @@
 /release/*
 libs/*
+bin/*
+/bin
