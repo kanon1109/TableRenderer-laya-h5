@@ -32,6 +32,8 @@ public class ScorllContainer extends Sprite
 	protected var _isBounce:Boolean;
 	//动画
 	protected var tween:Tween;
+	//最大速度
+	private const SPEED_MAX:int = 30;
 	//是否显示调试模式
 	private var isDebug:Boolean;
 	//回弹时间
@@ -277,6 +279,7 @@ public class ScorllContainer extends Sprite
 	{
 		this.updateScrollSpeed();
 		this.isTouched = false;
+		
 	}
 	
 	/**
@@ -291,6 +294,7 @@ public class ScorllContainer extends Sprite
 			else
 				this.speed = MouseManager.instance.mouseX - this.prevMousePos.x;
 		}
+		if (this.speed > SPEED_MAX) this.speed = SPEED_MAX;
 		this.prevMousePos.x = MouseManager.instance.mouseX;
 		this.prevMousePos.y = MouseManager.instance.mouseY;
 		this.speed *= this.friction;
