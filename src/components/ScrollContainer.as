@@ -11,7 +11,7 @@ import laya.utils.Tween;
  * ...滚动容器 实现基本的拖动滚动，回弹效果
  * @author ...Kanon
  */
-public class ScorllContainer extends Sprite 
+public class ScrollContainer extends Sprite 
 {
 	protected var content:Sprite;
 	//是否横向
@@ -19,21 +19,17 @@ public class ScorllContainer extends Sprite
 	//可显示的大小
 	protected var viewWidth:Number = 100;
 	protected var viewHeight:Number = 100;
-	//间隔
-	protected var _gap:Number = 0;
-	//内容列表
-	protected var contentList:Array;
 	//是否点击
 	protected var isTouched:Boolean;
 	//点击坐标
 	protected var touchPos:Point;
 	protected var contentPos:Point;
 	//释放后是否有弹性效果
-	protected var _isBounce:Boolean;
+	protected var isBounce:Boolean;
 	//动画
 	protected var tween:Tween;
 	//最大速度
-	private const SPEED_MAX:int = 30;
+	private const SPEED_MAX:int = 40;
 	//是否显示调试模式
 	private var isDebug:Boolean;
 	//回弹时间
@@ -44,7 +40,9 @@ public class ScorllContainer extends Sprite
 	private var friction:Number;
 	//上一次鼠标位置
 	private var prevMousePos:Point;
-	public function ScorllContainer() 
+	//是否显示调试内容框
+	private var _isShowDebug:Boolean;
+	public function ScrollContainer() 
 	{
 		this.initData();
 		this.initUI();
@@ -61,8 +59,8 @@ public class ScorllContainer extends Sprite
 		this.bounceDuration = 400;
 		this.isBounce = true;
 		this.isTouched = false;
+		this.isShowDebug = false;
 		this.optimizeScrollRect = true;
-		this.contentList = [];
 		this.touchPos = new Point();
 		this.contentPos = new Point();
 		this.prevMousePos = new Point();
@@ -75,6 +73,8 @@ public class ScorllContainer extends Sprite
 	{
 		this.content = new Sprite();
 		this.addChild(this.content);
+		this.content.width = 0;
+		this.content.height = 0;
 		this.setViewSize(this.viewWidth, this.viewHeight);
 	}
 	
@@ -93,41 +93,8 @@ public class ScorllContainer extends Sprite
 	/**
 	 * 更新内容的显示大小
 	 */
-	public function updateContentSize():void
+	protected function updateContentSize():void
 	{
-		var pos:Number = 0;
-		for (var i:int = 0; i < this.contentList.length; i++) 
-		{
-			var node:Sprite = this.contentList[i];
-			if (!this._isHorizontal)
-			{
-				node.x = 0;
-				node.y = pos;
-				if(i < this.contentList.length - 1)
-					pos += node.height + this._gap;
-				else
-					pos += node.height;
-			}
-			else
-			{
-				node.x = pos;
-				node.y = 0;
-				if(i < this.contentList.length - 1)
-					pos += node.width + this._gap;
-				else
-					pos += node.width;
-			}
-		}
-		if (this._isHorizontal)
-		{
-			this.content.width = pos;
-			this.content.height = this.viewHeight;
-		}
-		else
-		{
-			this.content.width = this.viewWidth;
-			this.content.height = pos;
-		}
 		this.debugDrawContentBound();
 	}
 	
@@ -136,47 +103,13 @@ public class ScorllContainer extends Sprite
 	 */
 	protected function debugDrawContentBound():void
 	{
+		trace("this.isShowDebug", this.isShowDebug);
+		if (!this.isShowDebug) return;
+		trace(this.content.x, this.content.y, this.content.width, this.content.height);
 		this.content.graphics.clear(true);
 		this.content.graphics.drawRect(this.content.x, this.content.y, this.content.width, this.content.height, null, "#ff00ff");
-		
 		this.graphics.clear(true);
 		this.graphics.drawRect(0, 0, this.width, this.height, null, "#ffff00");
-	}
-	
-	/**
-	 * 添加到内容容器中
-	 * @param	node	显示对象
-	 */
-	public function addNode(node:Sprite):void
-	{
-		this.content.addChild(node);
-		this.contentList.push(node); 
-		this.updateContentSize();
-	}
-	
-	/**
-	 * 根据索引删除节点
-	 * @param	index	索引
-	 */
-	public function removeNodeByIndex(index:int):void
-	{
-		if (index < 0 || index > this.contentList.length - 1) return;
-		this.contentList.splice(index, 1);
-		this.updateContentSize();
-	}
-	
-	/**
-	 * 删除所有子对象
-	 */
-	public function removeAllChild():void
-	{
-		var count:int = this.contentList.length;
-		for (var i:int = count - 1; i >= 0; --i)
-		{
-			var node:Sprite = this.contentList[i];
-			node.removeSelf();
-			this.contentList.splice(i, 1);
-		}
 	}
 	
 	/**
@@ -195,9 +128,22 @@ public class ScorllContainer extends Sprite
 	}
 	
 	/**
-	 * 回弹
+	 * 设置内容高宽
+	 * @param	width	宽度
+	 * @param	height	高度
 	 */
-	private function bounce():void
+	public function setContentSize(width:Number, height:Number):void
+	{
+		if (!this.content) return;
+		this.content.width = width;
+		this.content.height = height;
+		this.debugDrawContentBound();
+	}
+	
+	/**
+	 * 滚动回弹
+	 */
+	private function scorllBounce():void
 	{
 		if (this.isTouched || !this.isBounce) return;
 		if (!this._isHorizontal)
@@ -233,7 +179,7 @@ public class ScorllContainer extends Sprite
 	/**
 	 * 是否横向滚动
 	 */
-	public function get isHorizontal():Boolean {return _isHorizontal;}
+	public function get isHorizontal():Boolean {return _isHorizontal; }
 	public function set isHorizontal(value:Boolean):void 
 	{
 		_isHorizontal = value;
@@ -241,45 +187,13 @@ public class ScorllContainer extends Sprite
 	}
 	
 	/**
-	 * 间隔
+	 * 是否显示调试
 	 */
-	public function get gap():Number {return _gap;}
-	public function set gap(value:Number):void 
+	public function get isShowDebug():Boolean {return _isShowDebug;}
+	public function set isShowDebug(value:Boolean):void 
 	{
-		_gap = value;
-	}
-	
-	/**
-	 * 设置是否有回弹
-	 */
-	public function get isBounce():Boolean {return _isBounce;}
-	public function set isBounce(value:Boolean):void 
-	{
-		_isBounce = value;
-	}
-	
-	//------点击事件--------
-	private function contentMouseDownHandler():void 
-	{
-		this.isTouched = true;
-		if (this.tween)
-		{
-			this.tween.clear();
-			this.tween = null;
-		}
-		this.touchPos.x = MouseManager.instance.mouseX;
-		this.touchPos.y = MouseManager.instance.mouseY;
-		this.prevMousePos.x = this.touchPos.x;
-		this.prevMousePos.y = this.touchPos.y;
-		this.contentPos.x = this.content.x;
-		this.contentPos.y = this.content.y;
-	}
-	
-	private function contentMouseUpHandler():void 
-	{
-		this.updateScrollSpeed();
-		this.isTouched = false;
-		
+		_isShowDebug = value;
+		this.debugDrawContentBound();
 	}
 	
 	/**
@@ -295,6 +209,7 @@ public class ScorllContainer extends Sprite
 				this.speed = MouseManager.instance.mouseX - this.prevMousePos.x;
 		}
 		if (this.speed > SPEED_MAX) this.speed = SPEED_MAX;
+		else if (this.speed < -SPEED_MAX) this.speed = -SPEED_MAX;
 		this.prevMousePos.x = MouseManager.instance.mouseX;
 		this.prevMousePos.y = MouseManager.instance.mouseY;
 		this.speed *= this.friction;
@@ -336,12 +251,46 @@ public class ScorllContainer extends Sprite
 		}
 	}
 	
+	/**
+	 * 删除tween
+	 */
+	private function removeTween():void
+	{
+		if (this.tween)
+		{
+			this.tween.clear();
+			this.tween = null;
+		}
+	}
+		
+	//------点击事件--------
+	private function contentMouseDownHandler():void 
+	{
+		this.isTouched = true;
+		this.removeTween();
+		this.touchPos.x = MouseManager.instance.mouseX;
+		this.touchPos.y = MouseManager.instance.mouseY;
+		this.prevMousePos.x = this.touchPos.x;
+		this.prevMousePos.y = this.touchPos.y;
+		this.contentPos.x = this.content.x;
+		this.contentPos.y = this.content.y;
+	}
+	
+	private function contentMouseUpHandler():void 
+	{
+		this.updateScrollSpeed();
+		this.isTouched = false;
+		
+	}
+	
 	//帧循环
 	protected function loopHandler():void 
 	{
 		this.updateScrollSpeed();
-		this.bounce();
+		this.scorllBounce();
 		this.updatePos();
 	}
+	//------------------------------
+
 }
 }
