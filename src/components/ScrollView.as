@@ -11,7 +11,7 @@ import laya.utils.Tween;
  * ...滚动容器 实现基本的拖动滚动，回弹效果
  * @author ...Kanon
  */
-public class ScrollContainer extends Sprite 
+public class ScrollView extends Sprite 
 {
 	protected var content:Sprite;
 	//是否横向
@@ -42,7 +42,7 @@ public class ScrollContainer extends Sprite
 	private var prevMousePos:Point;
 	//是否显示调试内容框
 	private var _isShowDebug:Boolean;
-	public function ScrollContainer() 
+	public function ScrollView() 
 	{
 		this.initData();
 		this.initUI();
@@ -261,6 +261,15 @@ public class ScrollContainer extends Sprite
 			this.tween.clear();
 			this.tween = null;
 		}
+	}
+	
+	/**
+	 * 添加到内容容器中
+	 * @param	node	显示对象
+	 */
+	public function addToContent(node:Sprite):void
+	{
+		this.content.addChild(node);
 	}
 		
 	//------点击事件--------

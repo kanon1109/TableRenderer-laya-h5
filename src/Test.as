@@ -1,6 +1,6 @@
 package 
 {
-import components.ScrollList;
+import components.ListView;
 import laya.display.Sprite;
 import laya.display.Stage;
 import laya.events.Event;
@@ -10,7 +10,7 @@ import laya.ui.Image;
 import laya.ui.Label;
 import laya.utils.Handler;
 import laya.utils.Timer;
-import components.ScrollContainer;
+import components.ScrollView;
 /**
  * ...测试
  * @author ...Kanon
@@ -18,8 +18,8 @@ import components.ScrollContainer;
 public class Test 
 {
 	private var label:Label;
-	private var scrollList:ScrollList;
-	private var scroll:ScrollContainer;
+	private var scrollList:ListView;
+	private var scroll:ScrollView;
 	public function Test() 
 	{
 		Laya.init(1136, 640);
@@ -27,7 +27,7 @@ public class Test
 		Laya.stage.screenMode = Stage.SCREEN_HORIZONTAL;
 		Laya.stage.bgColor = "#0F1312";
 		
-		this.scrollList = new ScrollList();
+		this.scrollList = new ListView();
 		this.scrollList.setViewSize(200, 500);
 		this.scrollList.gap = 10;
 		this.scrollList.x = 100;
@@ -35,7 +35,7 @@ public class Test
 		this.scrollList.isShowDebug = true;
 		Laya.stage.addChild(this.scrollList);
 		
-		this.scroll = new ScrollContainer();
+		this.scroll = new ScrollView();
 		this.scroll.setViewSize(200, 500);
 		this.scroll.setContentSize(200, 1800);
 		this.scroll.x = 400;
@@ -60,8 +60,19 @@ public class Test
 		for (var i:int = 0; i < 15; i++) 
 		{
 			var img:Image = new Image("res/bg.png");
-			this.scrollList.addNode(img);
+			this.scrollList.addToContent(img);
 		}
+		
+		var img:Image = new Image("res/bg.png");
+		img.x = 0;
+		img.y = 20;
+		this.scroll.addToContent(img);
+		
+		img = new Image("res/bg.png");
+		img.x = 20;
+		img.y = 60;
+		this.scroll.addToContent(img);
+		
 		Laya.stage.on(Event.CLICK, this, clickHandler);
 		Laya.stage.on(Event.MOUSE_DOWN, this, stageMouseDownHandler);
 		Laya.stage.on(Event.MOUSE_UP, this, stageMouseUpHandler);

@@ -5,13 +5,13 @@ import laya.display.Sprite;
  * ...滚动列表（并非虚拟滚动列表）
  * @author ...Kanon
  */
-public class ScrollList extends ScrollContainer 
+public class ListView extends ScrollView 
 {
 	//内容列表
 	protected var contentList:Array;
 	//间隔
 	public var gap:Number = 0;
-	public function ScrollList() 
+	public function ListView() 
 	{
 		super();
 	}
@@ -29,9 +29,9 @@ public class ScrollList extends ScrollContainer
 	 * 添加到内容容器中
 	 * @param	node	显示对象
 	 */
-	public function addNode(node:Sprite):void
+	public function addToContent(node:Sprite):void
 	{
-		this.content.addChild(node);
+		super.addToContent(node);
 		this.contentList.push(node); 
 		this.updateContentSize();
 	}
