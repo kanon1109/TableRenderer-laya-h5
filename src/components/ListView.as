@@ -42,7 +42,6 @@ public class ListView extends ScrollView
 	override protected function updateContentSize():void
 	{
 		var pos:Number = 0;
-		trace(this.contentList);
 		for (var i:int = 0; i < this.contentList.length; i++) 
 		{
 			var node:Sprite = this.contentList[i];

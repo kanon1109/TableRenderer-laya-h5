@@ -149,29 +149,45 @@ public class ScrollView extends Sprite
 		if (!this._isHorizontal)
 		{
 			if (this.content.height == 0) return;
-			if (this.content.y > 0)
+			if (this.content.height <= this.viewHeight)
 			{
 				this.speed = 0;
 				if (!this.tween) this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
 			}
-			else if (this.content.y < this.viewHeight - this.content.height)
+			else
 			{
-				this.speed = 0;
-				if (!this.tween) this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
+				if (this.content.y > 0)
+				{
+					this.speed = 0;
+					if (!this.tween) this.tween = Tween.to(this.content, { y : 0 }, this.bounceDuration, Ease.circOut);
+				}
+				else if (this.content.y < this.viewHeight - this.content.height)
+				{
+					this.speed = 0;
+					if (!this.tween) this.tween = Tween.to(this.content, { y : this.viewHeight - this.content.height }, this.bounceDuration, Ease.circOut);
+				}
 			}
 		}
 		else
 		{
 			if (this.content.width == 0) return;
-			if (this.content.x > 0)
+			if (this.content.width <= this.viewWidth)
 			{
 				this.speed = 0;
 				if (!this.tween) this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
 			}
-			else if (this.content.x < this.viewWidth - this.content.width)
+			else
 			{
-				this.speed = 0;
-				if (!this.tween) this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
+				if (this.content.x > 0)
+				{
+					this.speed = 0;
+					if (!this.tween) this.tween = Tween.to(this.content, { x : 0 }, this.bounceDuration, Ease.circOut);
+				}
+				else if (this.content.x < this.viewWidth - this.content.width)
+				{
+					this.speed = 0;
+					if (!this.tween) this.tween = Tween.to(this.content, { x : this.viewWidth - this.content.width }, this.bounceDuration, Ease.circOut);
+				}
 			}
 		}
 	}

@@ -13,7 +13,7 @@ Project configuration:f:\workspace\kanon\myProject\html5\laya\TableRenderer-laya
 1,0.00,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/libs/laya/src,0,Collect
 1,2.00,,0,read class message
 1,89.94,,0,Disable Flash3D f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/src/Test.as
-12,89.94,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/Test.max.js,496193,
+12,89.94,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/Test.max.js,498446,
 11,89.94,f:/workspace/kanon/myProject/html5/laya/TableRenderer-laya-h5/bin/h5/Test.max.html,887,
 ******************************************************************************
 14,89.94,,0,
