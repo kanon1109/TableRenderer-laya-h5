@@ -48,7 +48,7 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(50, false, 350, 500, 100, 80);
+		this.tableView.initTable(28, false, 350, 500, 100, 80);
 		this.tableView.x = 700;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
@@ -71,7 +71,21 @@ public class Test
 	
 	private function updateTableCellHandler(cell:Cell):void 
 	{
-		trace("index", cell.index);
+		var label:Label;
+		if (!cell.getChildByName("txt"))
+		{
+			label = new Label();
+			label.name = "txt";
+			label.fontSize = 30;
+			label.color = "#FF0000";
+			cell.addChild(label);
+		}
+		else
+		{
+			label = cell.getChildByName("txt") as Label;
+			trace("index", cell.index);
+		}
+		label.text = cell.index.toString();
 	}
 	
 	private function loadImgComplete():void

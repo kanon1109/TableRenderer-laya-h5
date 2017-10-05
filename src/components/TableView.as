@@ -5,6 +5,11 @@ import laya.utils.Handler;
 /**
  * ...无限数量虚拟list或table
  * @author ...Kanon
+ * 
+ * 
+ * bug
+ * [第0为的cell不执行update]
+ * 最后一位的cell不执行update
  */
 public class TableView extends ScrollView
 {
@@ -53,13 +58,11 @@ public class TableView extends ScrollView
 		{
 			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth);
 			this.dspRows = Math.ceil(this.viewHeight / this.itemHeight);//行
-			this.showCount = this.dspRows;
 		}
 		else
 		{
 			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth);//列
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
-			this.showCount = this.dspColumns;
 		}
 	}
 	
@@ -148,9 +151,12 @@ public class TableView extends ScrollView
 			this.totalColumns = this.dspColumns;
 			this.vRows = this.dspRows;
 			this.vColumns = this.dspColumns;
+			trace("this.totalRows", this.totalRows);
+			trace("this.dspRows", this.dspRows);
 			if (this.totalRows > this.dspRows) this.vRows++;
+			else this.vRows = this.totalRows;
+			this.showCount = this.vRows;
 			this.setContentSize(this.viewWidth, this.itemHeight * this.totalRows);
-			if (this.showCount > this.vRows) this.showCount = this.vRows;
 		}
 		else
 		{
@@ -160,8 +166,9 @@ public class TableView extends ScrollView
 			this.vRows = this.dspRows;
 			this.vColumns = this.dspColumns;
 			if (this.totalColumns > this.dspColumns) this.vColumns++;
+			else this.vColumns = this.totalColumns;
+			this.showCount = this.vColumns;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
-			if (this.showCount > this.vColumns) this.showCount = this.vColumns;
 		}
 	}
 	
@@ -231,6 +238,7 @@ public class TableView extends ScrollView
 	private function updateCell():void
 	{
 		if (!this.cellList || this.cellList.length == 0) return;
+		trace(this.curIndex, this.curIndex + this.showCount);
 		for (var i:int = this.curIndex; i < this.curIndex + this.showCount; i++) 
 		{
 			var cell:Cell = this.cellList[i];
