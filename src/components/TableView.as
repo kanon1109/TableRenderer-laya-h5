@@ -9,7 +9,7 @@ import laya.utils.Handler;
  * 
  * bug
  * [第0为的cell不执行update]
- * 最后一位的cell不执行update
+ * [最后一位的cell不执行update]
  */
 public class TableView extends ScrollView
 {
@@ -151,8 +151,6 @@ public class TableView extends ScrollView
 			this.totalColumns = this.dspColumns;
 			this.vRows = this.dspRows;
 			this.vColumns = this.dspColumns;
-			trace("this.totalRows", this.totalRows);
-			trace("this.dspRows", this.dspRows);
 			if (this.totalRows > this.dspRows) this.vRows++;
 			else this.vRows = this.totalRows;
 			this.showCount = this.vRows;
@@ -238,7 +236,6 @@ public class TableView extends ScrollView
 	private function updateCell():void
 	{
 		if (!this.cellList || this.cellList.length == 0) return;
-		trace(this.curIndex, this.curIndex + this.showCount);
 		for (var i:int = this.curIndex; i < this.curIndex + this.showCount; i++) 
 		{
 			var cell:Cell = this.cellList[i];
