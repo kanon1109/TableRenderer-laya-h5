@@ -1,5 +1,6 @@
 package 
 {
+import components.Cell;
 import components.ListView;
 import components.TableView;
 import laya.display.Sprite;
@@ -47,11 +48,13 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		//this.tableView.isHorizontal = true;
-		this.tableView.initTable(30, 350, 500, 100, 80);
+		this.tableView.initTable(50, false, 350, 500, 100, 80);
 		this.tableView.x = 700;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
+		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
+		//this.tableView.isHorizontal = true;
+
 		//this.tableView.isHorizontal = true;
 		Laya.stage.addChild(this.tableView);
 		
@@ -64,6 +67,11 @@ public class Test
 		arr.push({url:"res/bg.png", type:Loader.IMAGE});
 		arr.push({url:"res/yellow.png", type:Loader.IMAGE});
 		Laya.loader.load(arr, Handler.create(this, loadImgComplete), null, Loader.IMAGE);
+	}
+	
+	private function updateTableCellHandler(cell:Cell):void 
+	{
+		trace("index", cell.index);
 	}
 	
 	private function loadImgComplete():void

@@ -103,7 +103,6 @@ public class ScrollView extends Sprite
 	 */
 	protected function debugDrawContentBound():void
 	{
-		trace("this.isShowDebug", this.isShowDebug);
 		if (!this.isShowDebug) return;
 		trace(this.content.x, this.content.y, this.content.width, this.content.height);
 		this.content.graphics.clear(true);
@@ -123,7 +122,7 @@ public class ScrollView extends Sprite
 		this.viewHeight = height;
 		this.width = width;
 		this.height = height;
-		this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
+		//this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
 		this.debugDrawContentBound();
 	}
 	

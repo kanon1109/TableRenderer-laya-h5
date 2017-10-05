@@ -1,6 +1,7 @@
 package components 
 {
 import laya.display.Sprite;
+import laya.utils.Handler;
 /**
  * ...无限数量虚拟list或table
  * @author ...Kanon
@@ -19,33 +20,47 @@ public class TableView extends ScrollView
 	//当前索引
 	private var curIndex:int;
 	private var cellList:Array;
+	//可显示的数量
+	private var showCount:int;
+	public var updateTableCell:Handler;
 	public function TableView() 
 	{
 		super();
 	}
 	
-	public function initTable(count:int, tableWidth:Number, tableHeight:Number, 
-										 itemWidth:Number, itemHeight:Number):void
+	public function initTable(count:int, isHorizontal:Boolean, 
+							  tableWidth:Number, tableHeight:Number, 
+							  itemWidth:Number, itemHeight:Number):void
 	{
 		this.setViewSize(tableWidth, tableHeight);
+		this._isHorizontal = isHorizontal;
 		this.itemWidth = itemWidth;
 		this.itemHeight = itemHeight;
-		this.curIndex = 0;
 		this.cellList = [];
+		this.updateRowsAndColums();
+		this.updateCount(count);
+		this.createCell();
+		//trace("this.dspRows, this.dspColumns", this.dspRows, this.dspColumns);
+		//trace("this.totalRows, this.totalColumns", this.totalRows, this.totalColumns);
+	}
+	
+	/**
+	 * 更新行数和列数
+	 */
+	private function updateRowsAndColums():void
+	{
 		if (!this._isHorizontal)
 		{
 			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth);
 			this.dspRows = Math.ceil(this.viewHeight / this.itemHeight);//行
+			this.showCount = this.dspRows;
 		}
 		else
 		{
 			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth);//列
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
+			this.showCount = this.dspColumns;
 		}
-		this.updateCount(count);
-		trace("this.dspRows, this.dspColumns", this.dspRows, this.dspColumns);
-		trace("this.totalRows, this.totalColumns", this.totalRows, this.totalColumns);
-		this.createCell();
 	}
 	
 	/**
@@ -53,6 +68,8 @@ public class TableView extends ScrollView
 	 */
 	private function createCell():void
 	{
+		this.removeAllCell();
+		this.curIndex = 0;
 		var cell:Cell;
 		var spt:Sprite;
 		if (!this._isHorizontal)
@@ -64,6 +81,7 @@ public class TableView extends ScrollView
 					cell = new Cell();
 					cell.width = this.viewWidth;
 					cell.height = this.itemHeight;
+					cell.index = i;
 					cell.y = i * this.itemHeight;
 					cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
 					this.content.addChild(cell);
@@ -93,6 +111,7 @@ public class TableView extends ScrollView
 					cell = new Cell();
 					cell.width = this.itemWidth;
 					cell.height = this.viewHeight;
+					cell.index = i;
 					cell.x = i * this.itemWidth;
 					cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
 					this.content.addChild(cell);
@@ -131,6 +150,7 @@ public class TableView extends ScrollView
 			this.vColumns = this.dspColumns;
 			if (this.totalRows > this.dspRows) this.vRows++;
 			this.setContentSize(this.viewWidth, this.itemHeight * this.totalRows);
+			if (this.showCount > this.vRows) this.showCount = this.vRows;
 		}
 		else
 		{
@@ -141,19 +161,20 @@ public class TableView extends ScrollView
 			this.vColumns = this.dspColumns;
 			if (this.totalColumns > this.dspColumns) this.vColumns++;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
+			if (this.showCount > this.vColumns) this.showCount = this.vColumns;
 		}
 	}
 	
 	/**
-	 * cell帧循环
+	 * cell循环滚动
 	 */
-	private function updateCell():void
+	private function scrollCell():void
 	{
 		var cell:Cell;
 		if (!this._isHorizontal)
 		{
 			//纵
-			if (this.curIndex < this.totalRows - this.dspRows && 
+			if (this.curIndex < this.totalRows - this.dspRows - 1 && 
 				this.content.y < -this.itemHeight * (this.curIndex + 1))
 			{
 				//将第一行转入最后一行
@@ -161,6 +182,7 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex] = null;
 				this.curIndex++;
 				this.cellList[this.curIndex + this.dspRows] = cell;
+				cell.index = this.curIndex + this.dspRows;
 				cell.y = (this.curIndex + this.dspRows) * this.itemHeight;
 			}
 			else if (this.curIndex > 0 && 
@@ -171,27 +193,81 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex + this.dspRows] = null;
 				this.curIndex--;
 				this.cellList[this.curIndex] = cell;
+				cell.index = this.curIndex;
 				cell.y = this.curIndex * this.itemHeight;
 			}
 		}
 		else
 		{
 			//横
+			if (this.curIndex < this.totalColumns - this.dspColumns - 1 && 
+				this.content.x < -this.itemWidth * (this.curIndex + 1))
+			{
+				//将第一行转入最后一行
+				cell = this.cellList[this.curIndex];
+				this.cellList[this.curIndex] = null;
+				this.curIndex++;
+				this.cellList[this.curIndex + this.dspColumns] = cell;
+				cell.x = (this.curIndex + this.dspColumns) * this.itemWidth;
+			}
+			else if (this.curIndex > 0 && 
+					 this.content.x > -this.itemWidth * this.curIndex)
+			{
+				//将最后一行转入第一行
+				cell = this.cellList[this.curIndex + this.dspColumns];
+				this.cellList[this.curIndex + this.dspColumns] = null;
+				this.curIndex--;
+				this.cellList[this.curIndex] = cell;
+				cell.x = this.curIndex * this.itemWidth;
+			}
 		}
-		//trace(this.curIndex);
+		//trace(this.curIndex, this.totalRows - this.dspRows);
 		//trace(this.cellList);
+	}
+	
+	/**
+	 * cell帧循环
+	 */
+	private function updateCell():void
+	{
+		if (!this.cellList || this.cellList.length == 0) return;
+		for (var i:int = this.curIndex; i < this.curIndex + this.showCount; i++) 
+		{
+			var cell:Cell = this.cellList[i];
+			if (this.updateTableCell);
+				this.updateTableCell.runWith(cell);
+		}
+	}
+	
+	/**
+	 * 删除所有cell
+	 */
+	private function removeAllCell():void
+	{
+		if (!this.cellList) return;
+		var count:int = this.cellList.length;
+		for (var i:int = count - 1; i >= 0; --i) 
+		{
+			var cell:Cell = this.cellList[i];
+			if(cell) cell.removeSelf();
+			this.cellList.splice(i, 1);
+		}
 	}
 	
 	override protected function loopHandler():void 
 	{
+		this.scrollCell();
 		this.updateCell();
 		super.loopHandler();
 	}
-}
-}
-
-import laya.display.Sprite;
-class Cell extends Sprite
-{
 	
+	override public function get isHorizontal():Boolean{ return super.isHorizontal; }
+	override public function set isHorizontal(value:Boolean):void 
+	{
+		super.isHorizontal = value;
+		this.updateRowsAndColums();
+		this.updateCount(count);
+		this.createCell();
+	}
+}
 }
