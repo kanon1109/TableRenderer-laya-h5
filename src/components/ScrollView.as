@@ -269,7 +269,7 @@ public class ScrollView extends Sprite
 	/**
 	 * 删除tween
 	 */
-	private function removeTween():void
+	protected function removeTween():void
 	{
 		if (this.tween)
 		{

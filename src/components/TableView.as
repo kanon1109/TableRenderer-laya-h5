@@ -6,8 +6,7 @@ import laya.utils.Handler;
  * ...无限数量虚拟list或table
  * @author ...Kanon
  * 
- * 
- * bug
+ * bug [] 为解决
  * [第0为的cell不执行update]
  * [最后一位的cell不执行update]
  */
@@ -257,6 +256,18 @@ public class TableView extends ScrollView
 			if(cell) cell.removeSelf();
 			this.cellList.splice(i, 1);
 		}
+	}
+	
+	/**
+	 * 更新数据数量
+	 * @param	count	数量
+	 */
+	public function reloadData(count:int):void
+	{
+		var diffCount:int = this.count - count;
+		this.removeTween();
+		this.updateCount(count);
+		this.createCell();
 	}
 	
 	override protected function loopHandler():void 

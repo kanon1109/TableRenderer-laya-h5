@@ -124,6 +124,7 @@ public class Test
 	
 	private function clickHandler():void 
 	{
+		this.tableView.reloadData(21);
 		//trace("clickHandler")
 		//var img:Image = new Image("res/bg.png");
 		//this.scroll.addNode(img);
