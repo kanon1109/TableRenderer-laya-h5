@@ -104,7 +104,6 @@ public class ScrollView extends Sprite
 	protected function debugDrawContentBound():void
 	{
 		if (!this.isShowDebug) return;
-		trace(this.content.x, this.content.y, this.content.width, this.content.height);
 		this.content.graphics.clear(true);
 		this.content.graphics.drawRect(this.content.x, this.content.y, this.content.width, this.content.height, null, "#ff00ff");
 		this.graphics.clear(true);
@@ -236,11 +235,13 @@ public class ScrollView extends Sprite
 	 */
 	protected function updatePos():void
 	{
+		if (this.content.height == 0 && !this._isHorizontal) return;
+		if (this.content.width == 0 && this._isHorizontal) return;
 		if (this.isTouched)
 		{
 			if (!this._isHorizontal)
 			{
-				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y) ;
+				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y);
 				if (!this.isBounce)
 				{
 					if (this.content.y > 0) this.content.y = 0;
@@ -249,7 +250,7 @@ public class ScrollView extends Sprite
 			}
 			else
 			{
-				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x) ;
+				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x);
 				if (!this.isBounce)
 				{
 					if (this.content.x > 0) this.content.x = 0;

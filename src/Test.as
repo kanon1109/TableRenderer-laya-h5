@@ -8,11 +8,13 @@ import laya.display.Stage;
 import laya.events.Event;
 import laya.events.MouseManager;
 import laya.net.Loader;
+import laya.ui.Button;
 import laya.ui.Image;
 import laya.ui.Label;
 import laya.utils.Handler;
 import laya.utils.Timer;
 import components.ScrollView;
+import test.Random;
 /**
  * ...测试
  * @author ...Kanon
@@ -23,12 +25,18 @@ public class Test
 	private var scrollList:ListView;
 	private var scroll:ScrollView;
 	private var tableView:TableView;
+	
+	private var itemList:Array;
+	private var count:int;
 	public function Test() 
 	{
 		Laya.init(1136, 640);
 		Laya.stage.scaleMode = Stage.SCALE_SHOWALL;
 		Laya.stage.screenMode = Stage.SCREEN_HORIZONTAL;
 		Laya.stage.bgColor = "#0F1312";
+		
+		this.count = Random.randint(0, 30);
+		this.updateData();
 		
 		//this.scrollList = new ListView();
 		//this.scrollList.setViewSize(200, 500);
@@ -48,7 +56,7 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(28, false, 350, 500, 100, 80);
+		this.tableView.initTable(this.itemList.length, false, 350, 500, 100, 80);
 		this.tableView.x = 700;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
@@ -67,6 +75,7 @@ public class Test
 		arr.push({url:"res/bg.png", type:Loader.IMAGE});
 		arr.push({url:"res/yellow.png", type:Loader.IMAGE});
 		Laya.loader.load(arr, Handler.create(this, loadImgComplete), null, Loader.IMAGE);
+		
 	}
 	
 	private function updateTableCellHandler(cell:Cell):void 
@@ -85,11 +94,24 @@ public class Test
 			label = cell.getChildByName("txt") as Label;
 			trace("index", cell.index);
 		}
-		label.text = cell.index.toString();
+		var itemVo:ItemVo = this.itemList[cell.index];
+		label.text = itemVo.name;
 	}
 	
 	private function loadImgComplete():void
 	{
+		var btn:Button = new Button("res/bg.png");
+		btn.x = 200;
+		btn.y = 200;
+		btn.on(Event.CLICK, this, addBtnClickHandler);
+		Laya.stage.addChild(btn);
+		
+		var btn:Button = new Button("res/bg.png");
+		btn.x = 100;
+		btn.y = 200;
+		btn.on(Event.CLICK, this, reduceBtnClickHandler);
+		Laya.stage.addChild(btn);
+		
 		for (var i:int = 0; i < 15; i++) 
 		{
 			var img:Image = new Image("res/bg.png");
@@ -112,6 +134,20 @@ public class Test
 		Laya.stage.on(Event.MOUSE_OUT, this, stageMouseUpHandler);
 	}
 	
+	private function reduceBtnClickHandler():void 
+	{
+		this.count--;
+		this.updateData();
+		this.tableView.reloadData(this.itemList.length);
+	}
+	
+	private function addBtnClickHandler():void 
+	{
+		this.count++;
+		this.updateData();
+		this.tableView.reloadData(this.itemList.length);
+	}
+	
 	private function stageMouseDownHandler():void 
 	{
 		this.label.text = "stage mouse down";
@@ -124,7 +160,6 @@ public class Test
 	
 	private function clickHandler():void 
 	{
-		this.tableView.reloadData(21);
 		//trace("clickHandler")
 		//var img:Image = new Image("res/bg.png");
 		//this.scroll.addNode(img);
@@ -132,5 +167,23 @@ public class Test
 		//this.scroll.setViewSize(500, 200);
 		//this.scroll.isHorizontal = true;
 	}
+	
+	private function updateData():void
+	{
+		this.itemList = [];
+		for (var i:int = 0; i < this.count; i++) 
+		{
+			var itemVo:ItemVo = new ItemVo();
+			itemVo.index = i;
+			itemVo.name = "item" + (i + 1);
+			this.itemList.push(itemVo);
+		}
+	}
 }
+}
+
+class ItemVo
+{
+	public var index:int;
+	public var name:String;
 }

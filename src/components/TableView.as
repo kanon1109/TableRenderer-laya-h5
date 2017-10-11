@@ -12,20 +12,20 @@ import laya.utils.Handler;
  */
 public class TableView extends ScrollView
 {
+	private var itemWidth:Number;
+	private var itemHeight:Number;
 	private var dspRows:int;//一屏显示几行
 	private var dspColumns:int;//一屏显示几列
 	private var totalRows:int //实际总行数
 	private var totalColumns:int //实际总列数
-	private var vRows:int;//虚拟行数
-	private var vColumns:int;//虚拟列数
-	private var count:int;//数量
-	private var itemWidth:Number;
-	private var itemHeight:Number;
+	private var count:int;//数据的数量
 	//当前索引
 	private var curIndex:int;
 	private var cellList:Array;
-	//可显示的数量
-	private var showCount:int;
+	//一行或一列可显示的数量
+	private var showLineCount:int = 0;
+	//最后一行或者一列的显示数量
+	private var lastLineCellCount:int = 0;
 	public var updateTableCell:Handler;
 	public function TableView() 
 	{
@@ -44,8 +44,6 @@ public class TableView extends ScrollView
 		this.updateRowsAndColums();
 		this.updateCount(count);
 		this.createCell();
-		//trace("this.dspRows, this.dspColumns", this.dspRows, this.dspColumns);
-		//trace("this.totalRows, this.totalColumns", this.totalRows, this.totalColumns);
 	}
 	
 	/**
@@ -72,30 +70,35 @@ public class TableView extends ScrollView
 	{
 		this.removeAllCell();
 		this.curIndex = 0;
+		if (count <= 0) return;
 		var cell:Cell;
 		var spt:Sprite;
 		if (!this._isHorizontal)
 		{
 			for (var i:int = 0; i < this.totalRows; ++i) 
 			{
-				if (i < this.vRows)
+				if (i < this.showLineCount)
 				{
 					cell = new Cell();
 					cell.width = this.viewWidth;
 					cell.height = this.itemHeight;
-					cell.index = i;
+					cell.row = i;
 					cell.y = i * this.itemHeight;
 					cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
 					this.content.addChild(cell);
 					this.cellList.push(cell);
-					for (var j:int = 0; j < this.vColumns; ++j) 
+					for (var j:int = 0; j < this.totalColumns; ++j)
 					{
-						spt = new Sprite();
-						spt.width = this.itemWidth;
-						spt.height = this.itemHeight;
-						spt.x = j * this.itemWidth;
-						spt.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
-						cell.addChild(spt);
+						var columnsCell:Cell = new Cell();
+						columnsCell.width = this.itemWidth;
+						columnsCell.height = this.itemHeight;
+						columnsCell.x = j * this.itemWidth;
+						columnsCell.row = i;
+						columnsCell.column = j;
+						columnsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
+						columnsCell.name = "cell" + j;
+						columnsCell.index = (cell.row * this.dspColumns) + columnsCell.column;
+						cell.addChild(columnsCell);
 					}
 				}
 				else
@@ -108,24 +111,28 @@ public class TableView extends ScrollView
 		{
 			for (var i:int = 0; i < this.totalColumns; ++i) 
 			{
-				if (i < this.vColumns)
+				if (i < this.showLineCount)
 				{
 					cell = new Cell();
 					cell.width = this.itemWidth;
 					cell.height = this.viewHeight;
-					cell.index = i;
+					cell.column = i;
 					cell.x = i * this.itemWidth;
 					cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
 					this.content.addChild(cell);
 					this.cellList.push(cell);
-					for (var j:int = 0; j < this.vRows; ++j) 
+					for (var j:int = 0; j < this.totalRows; ++j) 
 					{
-						spt = new Sprite();
-						spt.width = this.itemWidth;
-						spt.height = this.itemHeight;
-						spt.y = j * this.itemHeight;
-						spt.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
-						cell.addChild(spt);
+						var rowsCell:Cell = new Cell();
+						rowsCell.width = this.itemWidth;
+						rowsCell.height = this.itemHeight;
+						rowsCell.y = j * this.itemHeight;
+						rowsCell.column = i;
+						rowsCell.row = j;
+						rowsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
+						rowsCell.name = "cell" + j;
+						rowsCell.index = (cell.column * this.dspColumns) + rowsCell.row;
+						cell.addChild(rowsCell);
 					}
 				}
 				else
@@ -148,11 +155,11 @@ public class TableView extends ScrollView
 			//根据count计算出行数
 			this.totalRows = Math.ceil(this.count / this.dspColumns);
 			this.totalColumns = this.dspColumns;
-			this.vRows = this.dspRows;
-			this.vColumns = this.dspColumns;
-			if (this.totalRows > this.dspRows) this.vRows++;
-			else this.vRows = this.totalRows;
-			this.showCount = this.vRows;
+			this.showLineCount = this.dspRows;
+			if (this.totalRows > this.dspRows) this.showLineCount++;
+			else this.showLineCount = this.totalRows;
+			this.lastLineCellCount = this.count % this.dspColumns;
+			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspColumns;
 			this.setContentSize(this.viewWidth, this.itemHeight * this.totalRows);
 		}
 		else
@@ -160,11 +167,11 @@ public class TableView extends ScrollView
 			//根据count计算出列数
 			this.totalRows = this.dspRows;
 			this.totalColumns = Math.ceil(this.count / this.dspRows);
-			this.vRows = this.dspRows;
-			this.vColumns = this.dspColumns;
-			if (this.totalColumns > this.dspColumns) this.vColumns++;
-			else this.vColumns = this.totalColumns;
-			this.showCount = this.vColumns;
+			this.showLineCount = this.dspColumns;
+			if (this.totalColumns > this.dspColumns) this.showLineCount++;
+			else this.showLineCount = this.totalColumns;
+			this.lastLineCellCount = this.count % this.dspRows;
+			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspRows;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
 		}
 	}
@@ -186,7 +193,7 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex] = null;
 				this.curIndex++;
 				this.cellList[this.curIndex + this.dspRows] = cell;
-				cell.index = this.curIndex + this.dspRows;
+				cell.row = this.curIndex + this.dspRows;
 				cell.y = (this.curIndex + this.dspRows) * this.itemHeight;
 			}
 			else if (this.curIndex > 0 && 
@@ -197,7 +204,7 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex + this.dspRows] = null;
 				this.curIndex--;
 				this.cellList[this.curIndex] = cell;
-				cell.index = this.curIndex;
+				cell.row = this.curIndex;
 				cell.y = this.curIndex * this.itemHeight;
 			}
 		}
@@ -212,6 +219,7 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex] = null;
 				this.curIndex++;
 				this.cellList[this.curIndex + this.dspColumns] = cell;
+				cell.column = this.curIndex + this.dspColumns;
 				cell.x = (this.curIndex + this.dspColumns) * this.itemWidth;
 			}
 			else if (this.curIndex > 0 && 
@@ -222,6 +230,7 @@ public class TableView extends ScrollView
 				this.cellList[this.curIndex + this.dspColumns] = null;
 				this.curIndex--;
 				this.cellList[this.curIndex] = cell;
+				cell.column = this.curIndex;
 				cell.x = this.curIndex * this.itemWidth;
 			}
 		}
@@ -235,11 +244,27 @@ public class TableView extends ScrollView
 	private function updateCell():void
 	{
 		if (!this.cellList || this.cellList.length == 0) return;
-		for (var i:int = this.curIndex; i < this.curIndex + this.showCount; i++) 
+		var totalLine:int = this.totalRows;
+		var count:int = this.totalColumns;
+		if (this._isHorizontal) 
+		{
+			totalLine = this.totalColumns;
+			count = this.totalRows;
+		}
+		for (var i:int = this.curIndex; i < this.curIndex + this.showLineCount; ++i) 
 		{
 			var cell:Cell = this.cellList[i];
-			if (this.updateTableCell);
-				this.updateTableCell.runWith(cell);
+			var isLastLine:Boolean = i == totalLine - 1;
+			for (var j:int = 0; j < count; ++j) 
+			{
+				var c:Cell = cell.getChildByName("cell" + j) as Cell;
+				if (isLastLine) c.visible = j < this.lastLineCellCount;
+				else c.visible = true;
+				if (!this._isHorizontal) c.index = (cell.row * this.dspColumns) + c.column;
+				else c.index = (cell.column * this.dspRows) + c.row;
+				//最后一行或一列
+				if (this.updateTableCell && c.visible) this.updateTableCell.runWith(c);
+			}
 		}
 	}
 	
@@ -264,10 +289,23 @@ public class TableView extends ScrollView
 	 */
 	public function reloadData(count:int):void
 	{
-		var diffCount:int = this.count - count;
 		this.removeTween();
-		this.updateCount(count);
-		this.createCell();
+		this.content.x = 0;
+		this.content.y = 0;
+		var prevTotalRows:int = this.totalRows;
+		var prevTotalColumns:int = this.totalColumns;
+		var diffCount:int = this.count - count;
+		var totalCellCount:int = Math.ceil(this.count / this.dspRows);
+		if (!this._isHorizontal) totalCellCount = Math.ceil(this.count / this.dspColumns); 
+		if (diffCount < 0)
+		{
+			//增加
+			//先判断是否满一屏了
+		}
+		else if (diffCount > 0)
+		{
+			//减少
+		}
 	}
 	
 	override protected function loopHandler():void 
