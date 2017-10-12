@@ -22,8 +22,10 @@ public class TableView extends ScrollView
 	//当前索引
 	private var curIndex:int;
 	private var cellList:Array;
-	//一行或一列可显示的数量
+	//一屏可显示的行或列的数量
 	private var showLineCount:int = 0;
+	//根据数据数量计算出总的行或列的数量
+	private var totalLineCount:int = 0;
 	//最后一行或者一列的显示数量
 	private var lastLineCellCount:int = 0;
 	public var updateTableCell:Handler;
@@ -156,6 +158,7 @@ public class TableView extends ScrollView
 			this.totalRows = Math.ceil(this.count / this.dspColumns);
 			this.totalColumns = this.dspColumns;
 			this.showLineCount = this.dspRows;
+			this.totalLineCount = this.totalRows;
 			if (this.totalRows > this.dspRows) this.showLineCount++;
 			else this.showLineCount = this.totalRows;
 			this.lastLineCellCount = this.count % this.dspColumns;
@@ -168,6 +171,7 @@ public class TableView extends ScrollView
 			this.totalRows = this.dspRows;
 			this.totalColumns = Math.ceil(this.count / this.dspRows);
 			this.showLineCount = this.dspColumns;
+			this.totalLineCount = this.totalColumns;
 			if (this.totalColumns > this.dspColumns) this.showLineCount++;
 			else this.showLineCount = this.totalColumns;
 			this.lastLineCellCount = this.count % this.dspRows;
@@ -300,7 +304,11 @@ public class TableView extends ScrollView
 		if (diffCount < 0)
 		{
 			//增加
-			//先判断是否满一屏了
+			//先判断之前是否满一屏了
+			if (this.totalLineCount < this.showLineCount)
+			{
+				//小于一屏
+			}
 		}
 		else if (diffCount > 0)
 		{

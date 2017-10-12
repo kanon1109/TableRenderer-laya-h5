@@ -35,7 +35,7 @@ public class Test
 		Laya.stage.screenMode = Stage.SCREEN_HORIZONTAL;
 		Laya.stage.bgColor = "#0F1312";
 		
-		this.count = Random.randint(0, 30);
+		this.count = Random.randint(0, 130);
 		this.updateData();
 		
 		//this.scrollList = new ListView();
