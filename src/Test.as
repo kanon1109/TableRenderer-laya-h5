@@ -2,18 +2,15 @@ package
 {
 import components.Cell;
 import components.ListView;
+import components.ScrollView;
 import components.TableView;
-import laya.display.Sprite;
 import laya.display.Stage;
 import laya.events.Event;
-import laya.events.MouseManager;
 import laya.net.Loader;
 import laya.ui.Button;
 import laya.ui.Image;
 import laya.ui.Label;
 import laya.utils.Handler;
-import laya.utils.Timer;
-import components.ScrollView;
 import test.Random;
 /**
  * ...测试
@@ -36,7 +33,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 22;
+		this.count = 1;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -145,7 +142,7 @@ public class Test
 	private function addBtnClickHandler():void 
 	{
 		this.count++;
-		this.count = 28;
+		//this.count = 44;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
 	}

@@ -86,8 +86,6 @@ public class TableView extends ScrollView
 			{
 				if (i < this.showLineCount)
 					this.createOneLineCell(i, this._isHorizontal);
-				else
-					this.cellList.push(null);
 			}
 		}
 		else
@@ -96,8 +94,6 @@ public class TableView extends ScrollView
 			{
 				if (i < this.showLineCount)
 					this.createOneLineCell(i, this._isHorizontal);
-				else
-					this.cellList.push(null);
 			}
 		}
 	}
@@ -317,6 +313,16 @@ public class TableView extends ScrollView
 		//一屏可显示的行数或列数
 		var newShowLineCount:int = this.getShowLineCount();
 		var newTotalLineCount:int;
+		if (!this._isHorizontal)
+		{
+			var newTotalRows = Math.ceil(count / this.dspColumns);
+			if (newTotalRows < newShowLineCount) newShowLineCount = newTotalRows;
+		}
+		else
+		{
+			var newTotalColumns = Math.ceil(count / this.dspRows);
+			if (newTotalColumns < newTotalLineCount) newTotalLineCount = newTotalColumns;
+		}
 		if (diffCount > 0)
 		{
 			//增加
@@ -329,13 +335,11 @@ public class TableView extends ScrollView
 			if (addLine < 0) addLine = 0;
 			for (var i:int = 0; i < addLine; i++) 
 			{
-				this.createOneLineCell(i, this._isHorizontal);
+				this.createOneLineCell(lastLineIndex + (i + 1), this._isHorizontal);
 			}
-			var addVLine:int;
-			//计算增加的虚拟行列数
-			//this.cellList增加行或列数据
-			
-			
+			trace(this.cellList);
+
+			trace("lastLineIndex", lastLineIndex);
 			trace("addLine", addLine);
 			trace("totalLineCount", totalLineCount);
 			trace("newShowLineCount", newShowLineCount);
