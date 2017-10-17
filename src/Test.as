@@ -36,6 +36,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
+		this.count = 22;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -92,7 +93,7 @@ public class Test
 		else
 		{
 			label = cell.getChildByName("txt") as Label;
-			trace("index", cell.index);
+			//trace("index", cell.index);
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
 		label.text = itemVo.name;
@@ -101,7 +102,7 @@ public class Test
 	private function loadImgComplete():void
 	{
 		var btn:Button = new Button("res/bg.png");
-		btn.x = 200;
+		btn.x = 300;
 		btn.y = 200;
 		btn.on(Event.CLICK, this, addBtnClickHandler);
 		Laya.stage.addChild(btn);
@@ -144,6 +145,7 @@ public class Test
 	private function addBtnClickHandler():void 
 	{
 		this.count++;
+		this.count = 28;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
 	}

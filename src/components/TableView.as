@@ -28,6 +28,8 @@ public class TableView extends ScrollView
 	private var totalLineCount:int = 0;
 	//最后一行或者一列的显示数量
 	private var lastLineCellCount:int = 0;
+	//一行或一列的显示数量
+	private var oneLineCellCount:int = 0;
 	public var updateTableCell:Handler;
 	public function TableView() 
 	{
@@ -57,12 +59,17 @@ public class TableView extends ScrollView
 		{
 			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth);
 			this.dspRows = Math.ceil(this.viewHeight / this.itemHeight);//行
+			this.oneLineCellCount = this.dspColumns;
 		}
 		else
 		{
-			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth);//列
+			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth); //列
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
+			this.oneLineCellCount = this.dspRows;
 		}
+		
+		trace("this.dspRows",this.dspRows);
+		trace("this.dspColumns",this.dspColumns);
 	}
 	
 	/**
@@ -73,40 +80,14 @@ public class TableView extends ScrollView
 		this.removeAllCell();
 		this.curIndex = 0;
 		if (count <= 0) return;
-		var cell:Cell;
-		var spt:Sprite;
 		if (!this._isHorizontal)
 		{
 			for (var i:int = 0; i < this.totalRows; ++i) 
 			{
 				if (i < this.showLineCount)
-				{
-					cell = new Cell();
-					cell.width = this.viewWidth;
-					cell.height = this.itemHeight;
-					cell.row = i;
-					cell.y = i * this.itemHeight;
-					cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
-					this.content.addChild(cell);
-					this.cellList.push(cell);
-					for (var j:int = 0; j < this.totalColumns; ++j)
-					{
-						var columnsCell:Cell = new Cell();
-						columnsCell.width = this.itemWidth;
-						columnsCell.height = this.itemHeight;
-						columnsCell.x = j * this.itemWidth;
-						columnsCell.row = i;
-						columnsCell.column = j;
-						columnsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
-						columnsCell.name = "cell" + j;
-						columnsCell.index = (cell.row * this.dspColumns) + columnsCell.column;
-						cell.addChild(columnsCell);
-					}
-				}
+					this.createOneLineCell(i, this._isHorizontal);
 				else
-				{
 					this.cellList.push(null);
-				}
 			}
 		}
 		else
@@ -114,33 +95,67 @@ public class TableView extends ScrollView
 			for (var i:int = 0; i < this.totalColumns; ++i) 
 			{
 				if (i < this.showLineCount)
-				{
-					cell = new Cell();
-					cell.width = this.itemWidth;
-					cell.height = this.viewHeight;
-					cell.column = i;
-					cell.x = i * this.itemWidth;
-					cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
-					this.content.addChild(cell);
-					this.cellList.push(cell);
-					for (var j:int = 0; j < this.totalRows; ++j) 
-					{
-						var rowsCell:Cell = new Cell();
-						rowsCell.width = this.itemWidth;
-						rowsCell.height = this.itemHeight;
-						rowsCell.y = j * this.itemHeight;
-						rowsCell.column = i;
-						rowsCell.row = j;
-						rowsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
-						rowsCell.name = "cell" + j;
-						rowsCell.index = (cell.column * this.dspColumns) + rowsCell.row;
-						cell.addChild(rowsCell);
-					}
-				}
+					this.createOneLineCell(i, this._isHorizontal);
 				else
-				{
 					this.cellList.push(null);
-				}
+			}
+		}
+	}
+	
+	/**
+	 * 创建一行或一列的cell
+	 * @param	lineIndex		行或列的索引
+	 * @param	isHorizontal	横或竖
+	 */
+	private function createOneLineCell(lineIndex:int, isHorizontal:Boolean):void
+	{
+		var cell:Cell;
+		if (!isHorizontal)
+		{
+			cell = new Cell();
+			cell.width = this.viewWidth;
+			cell.height = this.itemHeight;
+			cell.row = lineIndex;
+			cell.y = lineIndex * this.itemHeight;
+			cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
+			this.content.addChild(cell);
+			this.cellList.push(cell);
+			for (var j:int = 0; j < this.totalColumns; ++j)
+			{
+				var columnsCell:Cell = new Cell();
+				columnsCell.width = this.itemWidth;
+				columnsCell.height = this.itemHeight;
+				columnsCell.x = j * this.itemWidth;
+				columnsCell.row = lineIndex;
+				columnsCell.column = j;
+				columnsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
+				columnsCell.name = "cell" + j;
+				columnsCell.index = (cell.row * this.dspColumns) + columnsCell.column;
+				cell.addChild(columnsCell);
+			}
+		}
+		else
+		{
+			cell = new Cell();
+			cell.width = this.itemWidth;
+			cell.height = this.viewHeight;
+			cell.column = lineIndex;
+			cell.x = lineIndex * this.itemWidth;
+			cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
+			this.content.addChild(cell);
+			this.cellList.push(cell);
+			for (var j:int = 0; j < this.totalRows; ++j) 
+			{
+				var rowsCell:Cell = new Cell();
+				rowsCell.width = this.itemWidth;
+				rowsCell.height = this.itemHeight;
+				rowsCell.y = j * this.itemHeight;
+				rowsCell.column = lineIndex;
+				rowsCell.row = j;
+				rowsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
+				rowsCell.name = "cell" + j;
+				rowsCell.index = (cell.column * this.dspColumns) + rowsCell.row;
+				cell.addChild(rowsCell);
 			}
 		}
 	}
@@ -152,15 +167,17 @@ public class TableView extends ScrollView
 	private function updateCount(count:int):void
 	{
 		this.count = count;
+		//计算一屏可显示的行列数
+		this.showLineCount = this.getShowLineCount();
 		if (!this._isHorizontal)
 		{
 			//根据count计算出行数
 			this.totalRows = Math.ceil(this.count / this.dspColumns);
 			this.totalColumns = this.dspColumns;
-			this.showLineCount = this.dspRows;
+			//总行列数包括虚拟行列数
 			this.totalLineCount = this.totalRows;
-			if (this.totalRows > this.dspRows) this.showLineCount++;
-			else this.showLineCount = this.totalRows;
+			if (this.totalRows < this.showLineCount) this.showLineCount = this.totalRows;
+			//计算最后一行数量
 			this.lastLineCellCount = this.count % this.dspColumns;
 			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspColumns;
 			this.setContentSize(this.viewWidth, this.itemHeight * this.totalRows);
@@ -170,10 +187,10 @@ public class TableView extends ScrollView
 			//根据count计算出列数
 			this.totalRows = this.dspRows;
 			this.totalColumns = Math.ceil(this.count / this.dspRows);
-			this.showLineCount = this.dspColumns;
+			//总行列数包括虚拟行列数
 			this.totalLineCount = this.totalColumns;
-			if (this.totalColumns > this.dspColumns) this.showLineCount++;
-			else this.showLineCount = this.totalColumns;
+			if (this.totalColumns < this.showLineCount) this.showLineCount = this.totalColumns;
+			//计算最后一列数量
 			this.lastLineCellCount = this.count % this.dspRows;
 			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspRows;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
@@ -293,27 +310,73 @@ public class TableView extends ScrollView
 	 */
 	public function reloadData(count:int):void
 	{
+		trace("最新数据数量", count);
 		this.removeTween();
-		this.content.x = 0;
-		this.content.y = 0;
-		var prevTotalRows:int = this.totalRows;
-		var prevTotalColumns:int = this.totalColumns;
-		var diffCount:int = this.count - count;
-		var totalCellCount:int = Math.ceil(this.count / this.dspRows);
-		if (!this._isHorizontal) totalCellCount = Math.ceil(this.count / this.dspColumns); 
-		if (diffCount < 0)
+		var diffCount:int = count - this.count;
+		if (diffCount == 0) return;
+		//一屏可显示的行数或列数
+		var newShowLineCount:int = this.getShowLineCount();
+		var newTotalLineCount:int;
+		if (diffCount > 0)
 		{
 			//增加
 			//先判断之前是否满一屏了
-			if (this.totalLineCount < this.showLineCount)
+			var remainCellCount:int = this.oneLineCellCount - this.lastLineCellCount; //最后一行剩余的空cell
+			//补全原来的最后一行的显示数量
+			var addCellCount:int = diffCount > remainCellCount ? remainCellCount : diffCount;
+			var lastLineIndex:int = this.getLastLineIndex();
+			var addLine:int = newShowLineCount - this.totalLineCount; //增加可显示的行数
+			if (addLine < 0) addLine = 0;
+			for (var i:int = 0; i < addLine; i++) 
 			{
-				//小于一屏
+				this.createOneLineCell(i, this._isHorizontal);
 			}
+			var addVLine:int;
+			//计算增加的虚拟行列数
+			//this.cellList增加行或列数据
+			
+			
+			trace("addLine", addLine);
+			trace("totalLineCount", totalLineCount);
+			trace("newShowLineCount", newShowLineCount);
+			trace("remainCellCount", remainCellCount);
 		}
 		else if (diffCount > 0)
 		{
 			//减少
 		}
+		
+		this.updateCount(count);
+	}
+	
+	/**
+	 * 根据行或列的索引获取cell数据
+	 * @param	index
+	 * @return
+	 */
+	private function getCellByLineIndex(index:int):Cell
+	{
+		if (!this.cellList) return null;
+		return this.cellList[index];
+	}
+	
+	/**
+	 * 获取最后一行的索引
+	 * @return
+	 */
+	private function getLastLineIndex():int
+	{
+		return this.showLineCount - 1;
+	}
+	
+	/**
+	 * 获取一屏可显示数量
+	 * @return
+	 */
+	public function getShowLineCount():int
+	{
+		if (!this._isHorizontal) return this.dspRows + 1;
+		return this.dspColumns + 1;
 	}
 	
 	override protected function loopHandler():void 
