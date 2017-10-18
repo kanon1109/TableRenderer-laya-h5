@@ -54,7 +54,7 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(this.itemList.length, false, 350, 500, 100, 80);
+		this.tableView.initTable(this.itemList.length, false, 350, 500, 100, 50);
 		this.tableView.x = 700;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
@@ -93,7 +93,7 @@ public class Test
 			//trace("index", cell.index);
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		label.text = itemVo.name;
+		label.text = "r: " + cell.row;
 	}
 	
 	private function loadImgComplete():void
@@ -135,6 +135,7 @@ public class Test
 	private function reduceBtnClickHandler():void 
 	{
 		this.count--;
+		if (this.count < 0) this.count = 0;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
 	}
