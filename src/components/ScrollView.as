@@ -30,8 +30,6 @@ public class ScrollView extends Sprite
 	protected var tween:Tween;
 	//最大速度
 	private const SPEED_MAX:int = 40;
-	//是否显示调试模式
-	private var isDebug:Boolean;
 	//回弹时间
 	private var bounceDuration:int;
 	//速度
@@ -41,7 +39,7 @@ public class ScrollView extends Sprite
 	//上一次鼠标位置
 	private var prevMousePos:Point;
 	//是否显示调试内容框
-	private var _isShowDebug:Boolean;
+	protected var _isShowDebug:Boolean;
 	public function ScrollView() 
 	{
 		this.initData();

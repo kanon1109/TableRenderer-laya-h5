@@ -67,6 +67,9 @@ public class TableView extends ScrollView
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
 			this.oneLineCellCount = this.dspRows;
 		}
+		
+		trace("行:", this.dspRows, "列:", this.dspColumns);
+		trace("oneLineCellCount:", this.oneLineCellCount);
 	}
 	
 	/**
@@ -93,6 +96,7 @@ public class TableView extends ScrollView
 					this.createOneLineCell(i, this._isHorizontal);
 			}
 		}
+		this.debugDrawContentBound();
 	}
 	
 	/**
@@ -111,7 +115,6 @@ public class TableView extends ScrollView
 			cell.row = lineIndex;
 			cell.index = lineIndex;
 			cell.y = lineIndex * this.itemHeight;
-			cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
 			this.content.addChild(cell);
 			this.cellList.push(cell);
 			for (var j:int = 0; j < this.totalColumns; ++j)
@@ -122,7 +125,6 @@ public class TableView extends ScrollView
 				columnsCell.x = j * this.itemWidth;
 				columnsCell.row = lineIndex;
 				columnsCell.column = j;
-				columnsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
 				columnsCell.name = "cell" + j;
 				columnsCell.index = (cell.row * this.dspColumns) + columnsCell.column;
 				cell.addChild(columnsCell);
@@ -136,7 +138,6 @@ public class TableView extends ScrollView
 			cell.column = lineIndex;
 			cell.index = lineIndex;
 			cell.x = lineIndex * this.itemWidth;
-			cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
 			this.content.addChild(cell);
 			this.cellList.push(cell);
 			for (var j:int = 0; j < this.totalRows; ++j) 
@@ -147,7 +148,6 @@ public class TableView extends ScrollView
 				rowsCell.y = j * this.itemHeight;
 				rowsCell.column = lineIndex;
 				rowsCell.row = j;
-				rowsCell.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
 				rowsCell.name = "cell" + j;
 				rowsCell.index = (cell.column * this.dspColumns) + rowsCell.row;
 				cell.addChild(rowsCell);
@@ -190,6 +190,10 @@ public class TableView extends ScrollView
 			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspRows;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
 		}
+		
+		trace("dspRows", this.dspRows);
+		trace("总行数", this.totalRows);
+		trace("总列数", this.totalColumns);
 	}
 	
 	/**
@@ -234,7 +238,7 @@ public class TableView extends ScrollView
 				cell = this.cellList.shift();
 				this.curIndex++;
 				this.cellList.push(cell);
-				cell.index = this.curIndex + this.dspRows;
+				cell.index = this.curIndex + this.dspColumns;
 				cell.column = cell.index;
 				cell.x = (this.curIndex + this.dspColumns) * this.itemWidth;
 			}
@@ -260,7 +264,6 @@ public class TableView extends ScrollView
 	private function updateCell():void
 	{
 		if (!this.cellList || this.cellList.length == 0) return;
-		//for (var i:int = this.curIndex; i < this.curIndex + this.showLineCount; ++i) 
 		for (var i:int = 0; i < this.cellList.length; ++i) 
 		{
 			var cell:Cell = this.cellList[i];
@@ -437,6 +440,40 @@ public class TableView extends ScrollView
 		this.scrollCell();
 		this.updateCell();
 		super.loopHandler();
+	}
+	
+	override protected function debugDrawContentBound():void 
+	{
+		super.debugDrawContentBound();
+		if (this.cellList)
+		{
+			for (var i:int = 0; i < this.cellList.length; i++) 
+			{
+				var cell:Cell = this.cellList[i];
+				cell.graphics.clear(true);
+				for (var j:int = 0; j < this.oneLineCellCount; ++j) 
+				{
+					var c:Cell = cell.getChildByName("cell" + j) as Cell;
+					if(c) c.graphics.clear(true);
+				}
+				if (this._isShowDebug)
+				{
+					if (!this._isHorizontal)
+					{
+						cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
+					}
+					else
+					{
+						cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
+					}
+					for (var j:int = 0; j < this.oneLineCellCount; ++j) 
+					{
+						var c:Cell = cell.getChildByName("cell" + j) as Cell;
+						if(c) c.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFFFF");
+					}
+				}
+			}
+		}
 	}
 	
 	override public function get isHorizontal():Boolean{ return super.isHorizontal; }

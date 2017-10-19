@@ -47,19 +47,19 @@ public class Test
 		this.scroll = new ScrollView();
 		this.scroll.setViewSize(200, 500);
 		this.scroll.setContentSize(200, 1800);
-		this.scroll.x = 400;
+		this.scroll.x = 900;
 		this.scroll.y = 50;
 		this.scroll.isShowDebug = true;
 		this.scroll.isHorizontal = true;
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(this.itemList.length, false, 350, 500, 100, 50);
-		this.tableView.x = 700;
+		this.tableView.initTable(this.itemList.length, false, 700, 500, 100, 50);
+		this.tableView.x = 100;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		//this.tableView.isHorizontal = true;
+		this.tableView.isHorizontal = true;
 
 		//this.tableView.isHorizontal = true;
 		Laya.stage.addChild(this.tableView);
@@ -68,7 +68,8 @@ public class Test
 		this.label.color = "#FF0000";
 		this.label.fontSize = 20;
 		Laya.stage.addChild(this.label);
-		
+		this.label.text = "数量:" + this.count;
+
 		var arr:Array = [];
 		arr.push({url:"res/bg.png", type:Loader.IMAGE});
 		arr.push({url:"res/yellow.png", type:Loader.IMAGE});
@@ -92,7 +93,8 @@ public class Test
 			label = cell.getChildByName("txt") as Label;
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		//label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		label.text = "r: " + cell.column + ", i" + (cell.index + 1);
 		//label.text = cell.index.toString();
 	}
 	
@@ -100,13 +102,13 @@ public class Test
 	{
 		var btn:Button = new Button("res/bg.png");
 		btn.x = 300;
-		btn.y = 200;
+		btn.y = 6;
 		btn.on(Event.CLICK, this, addBtnClickHandler);
 		Laya.stage.addChild(btn);
 		
 		var btn:Button = new Button("res/bg.png");
 		btn.x = 100;
-		btn.y = 200;
+		btn.y = 6;
 		btn.on(Event.CLICK, this, reduceBtnClickHandler);
 		Laya.stage.addChild(btn);
 		
@@ -135,6 +137,7 @@ public class Test
 	private function reduceBtnClickHandler():void 
 	{
 		//this.count -= 3;
+		this.tableView.isShowDebug = !this.tableView.isShowDebug;
 		this.count --;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
