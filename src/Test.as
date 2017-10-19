@@ -33,7 +33,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 0;
+		this.count = 120;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -83,17 +83,17 @@ public class Test
 		{
 			label = new Label();
 			label.name = "txt";
-			label.fontSize = 30;
+			label.fontSize = 24;
 			label.color = "#FF0000";
 			cell.addChild(label);
 		}
 		else
 		{
 			label = cell.getChildByName("txt") as Label;
-			//trace("index", cell.index);
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		label.text = "r: " + cell.row;
+		label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		//label.text = cell.index.toString();
 	}
 	
 	private function loadImgComplete():void
@@ -134,28 +134,34 @@ public class Test
 	
 	private function reduceBtnClickHandler():void 
 	{
-		this.count -= 3;
+		//this.count -= 3;
+		this.count --;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
+		this.label.text = "数量:" + this.count;
 	}
 	
 	private function addBtnClickHandler():void 
 	{
-		this.count += 44;
-		//this.count = 44;
+		//this.count += 44;
+		//this.count ++;
+		trace("上一次数量" + this.count);
+		this.count = Random.randint(0, 130);
+		//this.count = 16;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
+		this.label.text = "数量:" + this.count;
 	}
 	
 	private function stageMouseDownHandler():void 
 	{
-		this.label.text = "stage mouse down";
+		//this.label.text = "stage mouse down";
 	}
 	
 	private function stageMouseUpHandler():void 
 	{
-		this.label.text = "stage mouse up";
+		//this.label.text = "数量:" + this.count;
 	}
 	
 	private function clickHandler():void 

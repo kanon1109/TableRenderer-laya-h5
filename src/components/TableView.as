@@ -67,9 +67,6 @@ public class TableView extends ScrollView
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
 			this.oneLineCellCount = this.dspRows;
 		}
-		
-		trace("this.dspRows",this.dspRows);
-		trace("this.dspColumns",this.dspColumns);
 	}
 	
 	/**
@@ -350,8 +347,10 @@ public class TableView extends ScrollView
 			//减少
 			var reduceLine:int = this.totalLineCount - newTotalLineCount;
 			var newLastLineIndex:int = newTotalLineCount - 1;
+			//扣除不会显示的行数
+			reduceLine -= this.totalLineCount - (this.curIndex + this.showLineCount);
 			if (reduceLine < 0) reduceLine = 0;
-			if (this.getLastLineIndex() <= this.getCurShowLastLineIndex())
+			if (newLastLineIndex < this.getCurShowLastLineIndex())
 			{
 				for (var i:int = 0; i < reduceLine; i++)
 				{
