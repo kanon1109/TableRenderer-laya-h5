@@ -33,7 +33,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 1;
+		this.count = 0;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -134,7 +134,7 @@ public class Test
 	
 	private function reduceBtnClickHandler():void 
 	{
-		this.count--;
+		this.count -= 3;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
@@ -142,7 +142,7 @@ public class Test
 	
 	private function addBtnClickHandler():void 
 	{
-		this.count++;
+		this.count += 44;
 		//this.count = 44;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);

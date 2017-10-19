@@ -112,6 +112,7 @@ public class TableView extends ScrollView
 			cell.width = this.viewWidth;
 			cell.height = this.itemHeight;
 			cell.row = lineIndex;
+			cell.index = lineIndex;
 			cell.y = lineIndex * this.itemHeight;
 			cell.graphics.drawRect(0, 0, this.viewWidth, this.itemHeight, null, "#00FFFF");
 			this.content.addChild(cell);
@@ -136,6 +137,7 @@ public class TableView extends ScrollView
 			cell.width = this.itemWidth;
 			cell.height = this.viewHeight;
 			cell.column = lineIndex;
+			cell.index = lineIndex;
 			cell.x = lineIndex * this.itemWidth;
 			cell.graphics.drawRect(0, 0, this.itemWidth, this.viewHeight, null, "#00FFFF");
 			this.content.addChild(cell);
@@ -206,22 +208,22 @@ public class TableView extends ScrollView
 				this.content.y < -this.itemHeight * (this.curIndex + 1))
 			{
 				//将第一行转入最后一行
-				cell = this.cellList[this.curIndex];
-				this.cellList[this.curIndex] = null;
+				cell = this.cellList.shift();
 				this.curIndex++;
-				this.cellList[this.curIndex + this.dspRows] = cell;
-				cell.row = this.curIndex + this.dspRows;
+				this.cellList.push(cell);
+				cell.index = this.curIndex + this.dspRows;
+				cell.row = cell.index;
 				cell.y = (this.curIndex + this.dspRows) * this.itemHeight;
 			}
 			else if (this.curIndex > 0 && 
 					 this.content.y > -this.itemHeight * this.curIndex)
 			{
 				//将最后一行转入第一行
-				cell = this.cellList[this.curIndex + this.dspRows];
-				this.cellList[this.curIndex + this.dspRows] = null;
+				cell = this.cellList.pop();
 				this.curIndex--;
-				this.cellList[this.curIndex] = cell;
-				cell.row = this.curIndex;
+				this.cellList.unshift(cell);
+				cell.index = this.curIndex;
+				cell.row = cell.index;
 				cell.y = this.curIndex * this.itemHeight;
 			}
 		}
@@ -232,22 +234,22 @@ public class TableView extends ScrollView
 				this.content.x < -this.itemWidth * (this.curIndex + 1))
 			{
 				//将第一行转入最后一行
-				cell = this.cellList[this.curIndex];
-				this.cellList[this.curIndex] = null;
+				cell = this.cellList.shift();
 				this.curIndex++;
-				this.cellList[this.curIndex + this.dspColumns] = cell;
-				cell.column = this.curIndex + this.dspColumns;
+				this.cellList.push(cell);
+				cell.index = this.curIndex + this.dspRows;
+				cell.column = cell.index;
 				cell.x = (this.curIndex + this.dspColumns) * this.itemWidth;
 			}
 			else if (this.curIndex > 0 && 
 					 this.content.x > -this.itemWidth * this.curIndex)
 			{
 				//将最后一行转入第一行
-				cell = this.cellList[this.curIndex + this.dspColumns];
-				this.cellList[this.curIndex + this.dspColumns] = null;
+				cell = this.cellList.pop();
 				this.curIndex--;
-				this.cellList[this.curIndex] = cell;
-				cell.column = this.curIndex;
+				this.cellList.unshift(cell);
+				cell.index = this.curIndex;
+				cell.column = cell.index;
 				cell.x = this.curIndex * this.itemWidth;
 			}
 		}
@@ -261,19 +263,12 @@ public class TableView extends ScrollView
 	private function updateCell():void
 	{
 		if (!this.cellList || this.cellList.length == 0) return;
-		var totalLine:int = this.totalRows;
-		var count:int = this.totalColumns;
-		if (this._isHorizontal) 
-		{
-			totalLine = this.totalColumns;
-			count = this.totalRows;
-		}
-		for (var i:int = this.curIndex; i < this.curIndex + this.showLineCount; ++i) 
+		//for (var i:int = this.curIndex; i < this.curIndex + this.showLineCount; ++i) 
+		for (var i:int = 0; i < this.cellList.length; ++i) 
 		{
 			var cell:Cell = this.cellList[i];
-			//if (!cell) continue;
-			var isLastLine:Boolean = i == totalLine - 1;
-			for (var j:int = 0; j < count; ++j) 
+			var isLastLine:Boolean = cell.index == this.getLastLineIndex();
+			for (var j:int = 0; j < this.oneLineCellCount; ++j) 
 			{
 				var c:Cell = cell.getChildByName("cell" + j) as Cell;
 				if (isLastLine) c.visible = j < this.lastLineCellCount;
@@ -289,7 +284,8 @@ public class TableView extends ScrollView
 					c.index = (cell.column * this.dspRows) + c.row;
 				}
 				//最后一行或一列
-				if (this.updateTableCell && c.visible) this.updateTableCell.runWith(c);
+				if (this.updateTableCell && c.visible) 
+					this.updateTableCell.runWith(c);
 			}
 		}
 	}
@@ -315,8 +311,6 @@ public class TableView extends ScrollView
 	 */
 	public function reloadData(count:int):void
 	{
-		trace("上一次数量", this.count);
-		trace("最新数据数量", count);
 		if (count < 0) return;
 		this.removeTween();
 		var diffCount:int = count - this.count;
@@ -343,10 +337,9 @@ public class TableView extends ScrollView
 		if (diffCount > 0)
 		{
 			//增加
-			trace("增加");
 			var addLine:int = newShowLineCount - this.totalLineCount;
 			if (addLine < 0) addLine = 0; //新的一屏行数与总行数相减
-			for (var i:int = 0; i < addLine; i++) 
+			for (var i:int = 0; i < addLine; i++)
 			{
 				var lineIndex:int = this.getLastShowLineIndex() + i + 1;
 				this.createOneLineCell(lineIndex, this._isHorizontal);
@@ -355,33 +348,39 @@ public class TableView extends ScrollView
 		else if (diffCount < 0)
 		{
 			//减少
-			trace("减少");
 			var reduceLine:int = this.totalLineCount - newTotalLineCount;
+			var newLastLineIndex:int = newTotalLineCount - 1;
 			if (reduceLine < 0) reduceLine = 0;
-			trace("prev cellList ", this.cellList);
-			for (var i:int = 0; i < reduceLine; i++) 
+			if (this.getLastLineIndex() <= this.getCurShowLastLineIndex())
 			{
-				var lineIndex:int = this.totalLineCount - 1 - i;
-				trace("lineIndex", lineIndex);
-				var cell:Cell = this.cellList[lineIndex];
-				if (cell) cell.removeSelf();
-				this.cellList.splice(lineIndex, 1);
-			}
-			trace("当前索引位置", this.curIndex);
-			//如果最后一行在可显示的范围内被删除this.curIndex需要减少
-			trace("reduceLine", reduceLine);
-			//获取最后一个能够被显示的行或列的索引
-			if (this.getLastLineIndex() == this.getCurShowLastLineIndex())
-			{
-				this.curIndex -= reduceLine;
-				if (this.curIndex < 0) this.curIndex = 0;
-				trace("修正后当前索引位置", this.curIndex);
+				for (var i:int = 0; i < reduceLine; i++)
+				{
+					var cell:Cell = this.cellList.pop();
+					if (this.curIndex > 0)
+					{
+						//curIndex > 0才需要交换位置
+						this.curIndex--;
+						this.cellList.unshift(cell);
+						cell.index = this.curIndex;
+						if (!this._isHorizontal)
+						{
+							cell.row = cell.index;
+							cell.y = this.curIndex * this.itemHeight;
+						}
+						else
+						{
+							cell.column = cell.index;
+							cell.x = this.curIndex * this.itemWidth;
+						}
+					}
+					else
+					{
+						cell.removeSelf();
+					}
+				}
 			}
 		}
 		this.updateCount(count);
-		trace("总行数", this.totalRows);
-		trace("最后一行数量", this.lastLineCellCount);
-		trace(this.cellList);
 		this.content.x = prevX;
 		this.content.y = prevY;
 	}
