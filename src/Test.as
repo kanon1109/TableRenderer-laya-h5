@@ -54,10 +54,10 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(this.itemList.length, false, 700, 500, 100, 50);
+		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.tableView.x = 100;
 		this.tableView.y = 50;
-		this.tableView.isShowDebug = true;
+		//this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
 		//this.tableView.isHorizontal = true;
 
@@ -80,8 +80,12 @@ public class Test
 	private function updateTableCellHandler(cell:Cell):void 
 	{
 		var label:Label;
+		var bg:Image;
 		if (!cell.getChildByName("txt"))
 		{
+			bg = new Image("res/bg.png");
+			cell.addChild(bg);
+			
 			label = new Label();
 			label.name = "txt";
 			label.fontSize = 24;
