@@ -190,10 +190,9 @@ public class TableView extends ScrollView
 			if (this.lastLineCellCount == 0 && this.count > 0) this.lastLineCellCount = this.dspRows;
 			this.setContentSize(this.itemWidth * this.totalColumns, this.viewHeight);
 		}
-		
-		trace("dspRows", this.dspRows);
-		trace("总行数", this.totalRows);
-		trace("总列数", this.totalColumns);
+		//trace("dspRows", this.dspRows);
+		//trace("总行数", this.totalRows);
+		//trace("总列数", this.totalColumns);
 	}
 	
 	/**
@@ -433,6 +432,53 @@ public class TableView extends ScrollView
 	private function getCurShowLastLineIndex():int
 	{
 		return this.curIndex + this.showLineCount - 1;
+	}
+	
+	/**
+	 * 获取一屏尺寸下可显示的数量
+	 * @return
+	 */
+	private function getDspShowCount():int
+	{
+		if (!this._isHorizontal) return this.dspRows;
+		else return this.dspColumns;
+	}
+	
+	/**
+	 * 根据index滚动到相应的位置
+	 * @param	cellIndex	索引
+	 */
+	public function scrollToIndex(cellIndex:int):void
+	{
+		if (!this.cellList) return;
+		this.removeTween();
+		if (cellIndex < 0) 
+			cellIndex = 0;
+		else if (cellIndex > this.count - 1) 
+			cellIndex = this.count - 1;
+		var index:int;
+		if (!this._isHorizontal)
+			index = Math.ceil((cellIndex + 1) / this.dspColumns) - 1;
+		else
+			index = Math.ceil((cellIndex + 1) / this.dspRows) - 1;
+		if (!this._isHorizontal)
+		{
+			if (this.content.height > this.viewHeight)
+			{
+				this.content.y = -this.itemHeight * index;
+				if (this.content.y < this.viewHeight - this.content.height)
+					this.content.y = this.viewHeight - this.content.height;
+			}
+		}
+		else
+		{
+			if (this.content.width > this.viewWidth) 
+			{
+				this.content.x = -this.itemWidth * index;
+				if (this.content.x < this.viewWidth - this.content.width)
+					this.content.x = this.viewWidth - this.content.width;
+			}
+		}
 	}
 	
 	override protected function loopHandler():void 

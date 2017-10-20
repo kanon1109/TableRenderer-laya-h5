@@ -29,7 +29,7 @@ public class ListView extends ScrollView
 	 * 添加到内容容器中
 	 * @param	node	显示对象
 	 */
-	public function addToContent(node:Sprite):void
+	override public function addToContent(node:Sprite):void
 	{
 		super.addToContent(node);
 		this.contentList.push(node); 

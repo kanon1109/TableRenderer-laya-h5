@@ -119,7 +119,7 @@ public class ScrollView extends Sprite
 		this.viewHeight = height;
 		this.width = width;
 		this.height = height;
-		//this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
+		this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
 		this.debugDrawContentBound();
 	}
 	

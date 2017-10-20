@@ -59,7 +59,7 @@ public class Test
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		this.tableView.isHorizontal = true;
+		//this.tableView.isHorizontal = true;
 
 		//this.tableView.isHorizontal = true;
 		Laya.stage.addChild(this.tableView);
@@ -102,14 +102,20 @@ public class Test
 	{
 		var btn:Button = new Button("res/bg.png");
 		btn.x = 300;
-		btn.y = 6;
+		btn.y = 600;
 		btn.on(Event.CLICK, this, addBtnClickHandler);
 		Laya.stage.addChild(btn);
 		
 		var btn:Button = new Button("res/bg.png");
 		btn.x = 100;
-		btn.y = 6;
+		btn.y = 600;
 		btn.on(Event.CLICK, this, reduceBtnClickHandler);
+		Laya.stage.addChild(btn);
+		
+		var btn:Button = new Button("res/bg.png");
+		btn.x = 500;
+		btn.y = 600;
+		btn.on(Event.CLICK, this, gotoBtnClickHandler);
 		Laya.stage.addChild(btn);
 		
 		for (var i:int = 0; i < 15; i++) 
@@ -132,6 +138,13 @@ public class Test
 		Laya.stage.on(Event.MOUSE_DOWN, this, stageMouseDownHandler);
 		Laya.stage.on(Event.MOUSE_UP, this, stageMouseUpHandler);
 		Laya.stage.on(Event.MOUSE_OUT, this, stageMouseUpHandler);
+	}
+	
+	private function gotoBtnClickHandler():void 
+	{
+		var cellIndex:int = Random.randint(0, this.count - 1);
+		this.label.text = "数量:" + this.count + " cellIndex:" + cellIndex;
+		this.tableView.scrollToIndex(cellIndex);
 	}
 	
 	private function reduceBtnClickHandler():void 
