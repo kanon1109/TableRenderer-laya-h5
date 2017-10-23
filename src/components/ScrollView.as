@@ -57,7 +57,7 @@ public class ScrollView extends Sprite
 		this.bounceDuration = 400;
 		this.isBounce = true;
 		this.isTouched = false;
-		this.isShowDebug = false;
+		this._isShowDebug = false;
 		this.optimizeScrollRect = true;
 		this.touchPos = new Point();
 		this.contentPos = new Point();
@@ -101,11 +101,13 @@ public class ScrollView extends Sprite
 	 */
 	protected function debugDrawContentBound():void
 	{
-		if (!this.isShowDebug) return;
-		this.content.graphics.clear(true);
-		this.content.graphics.drawRect(this.content.x, this.content.y, this.content.width, this.content.height, null, "#ff00ff");
 		this.graphics.clear(true);
-		this.graphics.drawRect(0, 0, this.width, this.height, null, "#ffff00");
+		if (this.content) this.content.graphics.clear(true);
+		if (this.isShowDebug)
+		{
+			if (this.content) this.content.graphics.drawRect(0, 0, this.content.width, this.content.height, null, "#ff00ff");
+			this.graphics.drawRect(0, 0, this.width, this.height, null, "#ffff00");
+		}
 	}
 	
 	/**

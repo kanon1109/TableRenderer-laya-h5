@@ -311,7 +311,7 @@ public class TableView extends ScrollView
 	public function reloadData(count:int):void
 	{
 		if (count < 0) return;
-		this.removeTween();
+		this.stopScroll();
 		var diffCount:int = count - this.count;
 		if (diffCount == 0) return;
 		var prevX:Number = this.content.x;
@@ -381,9 +381,9 @@ public class TableView extends ScrollView
 				}
 			}
 		}
-		this.updateCount(count);
 		this.content.x = prevX;
 		this.content.y = prevY;
+		this.updateCount(count);
 		if (!this._isHorizontal)
 		{
 			if (this.content.y < this.viewHeight - this.content.height)
@@ -523,6 +523,7 @@ public class TableView extends ScrollView
 			startIndex++;
 		}
 		this.updateCell();
+		this.debugDrawContentBound();
 	}
 	
 	override protected function loopHandler():void 
