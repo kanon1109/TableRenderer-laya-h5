@@ -189,6 +189,15 @@ public class ScrollView extends Sprite
 	}
 	
 	/**
+	 * 停止滚动
+	 */
+	public function stopScroll():void
+	{
+		this.removeTween();
+		this.speed = 0;
+	}
+	
+	/**
 	 * 是否横向滚动
 	 */
 	public function get isHorizontal():Boolean {return _isHorizontal; }

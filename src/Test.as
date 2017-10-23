@@ -33,7 +33,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 120;
+		this.count = 20;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -57,9 +57,9 @@ public class Test
 		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.tableView.x = 100;
 		this.tableView.y = 50;
-		//this.tableView.isShowDebug = true;
+		this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		//this.tableView.isHorizontal = true;
+		this.tableView.isHorizontal = true;
 
 		//this.tableView.isHorizontal = true;
 		Laya.stage.addChild(this.tableView);
@@ -97,8 +97,8 @@ public class Test
 			label = cell.getChildByName("txt") as Label;
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		//label.text = "r: " + cell.row + ", i" + (cell.index + 1);
-		label.text = "r: " + cell.column + ", i" + (cell.index + 1);
+		label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		//label.text = "r: " + cell.column + ", i" + (cell.index + 1);
 		//label.text = cell.index.toString();
 	}
 	
@@ -147,7 +147,9 @@ public class Test
 	private function gotoBtnClickHandler():void 
 	{
 		var cellIndex:int = Random.randint(0, this.count - 1);
-		this.label.text = "数量:" + this.count + " cellIndex:" + cellIndex;
+		//cellIndex = this.count - 1;
+		//cellIndex = 7;
+		this.label.text = "数量:" + this.count + " cellIndex:" + (cellIndex + 1);
 		this.tableView.scrollToIndex(cellIndex);
 	}
 	
@@ -155,7 +157,7 @@ public class Test
 	{
 		//this.count -= 3;
 		this.tableView.isShowDebug = !this.tableView.isShowDebug;
-		this.count --;
+		this.count--;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
 		this.tableView.reloadData(this.itemList.length);
@@ -165,7 +167,7 @@ public class Test
 	private function addBtnClickHandler():void 
 	{
 		//this.count += 44;
-		//this.count ++;
+		this.count ++;
 		trace("上一次数量" + this.count);
 		this.count = Random.randint(0, 130);
 		//this.count = 16;

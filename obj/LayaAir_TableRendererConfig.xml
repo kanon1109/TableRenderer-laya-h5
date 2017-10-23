@@ -3,8 +3,6 @@
 <!--Any modifications you make may be lost.-->
 <flex-config>
   <target-player>18.0</target-player>
-  <benchmark>false</benchmark>
-  <static-link-runtime-shared-libraries>true</static-link-runtime-shared-libraries>
   <compiler>
     <define append="true">
       <name>CONFIG::debug</name>
@@ -16,7 +14,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'2017/10/4'</value>
+      <value>'2017/10/23'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -32,14 +30,13 @@
     </define>
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
-      <path-element>E:\workspace\kanon\html5Project\layabox\layaAir\TableRenderer-laya-h5\src</path-element>
-      <path-element>E:\workspace\kanon\html5Project\layabox\layaAir\TableRenderer-laya-h5\libs\laya\src</path-element>
-      <path-element>E:\workspace\kanon\flashProject\geckosas3lib\src</path-element>
-      <path-element>d:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
+      <path-element>F:\workspace\kanon\myProject\html5\laya\TableRenderer-laya-h5\src</path-element>
+      <path-element>F:\workspace\kanon\myProject\html5\laya\TableRenderer-laya-h5\libs\laya\src</path-element>
+      <path-element>F:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
   </compiler>
   <file-specs>
-    <path-element>E:\workspace\kanon\html5Project\layabox\layaAir\TableRenderer-laya-h5\src\Test.as</path-element>
+    <path-element>F:\workspace\kanon\myProject\html5\laya\TableRenderer-laya-h5\src\Test.as</path-element>
   </file-specs>
   <default-background-color>#FFFFFF</default-background-color>
   <default-frame-rate>30</default-frame-rate>

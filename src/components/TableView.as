@@ -384,6 +384,26 @@ public class TableView extends ScrollView
 		this.updateCount(count);
 		this.content.x = prevX;
 		this.content.y = prevY;
+		if (!this._isHorizontal)
+		{
+			if (this.content.y < this.viewHeight - this.content.height)
+			{
+				if (this.content.height < this.viewHeight)
+					this.content.y = 0;
+				else
+					this.content.y = this.viewHeight - this.content.height;
+			}
+		}
+		else
+		{
+			if (this.content.x < this.viewWidth - this.content.width)
+			{
+				if (this.content.width < this.viewWidth)
+					this.content.x = 0;
+				else
+					this.content.x = this.viewWidth - this.content.width;
+			}
+		}
 	}
 	
 	/**
@@ -451,34 +471,58 @@ public class TableView extends ScrollView
 	public function scrollToIndex(cellIndex:int):void
 	{
 		if (!this.cellList) return;
-		this.removeTween();
+		this.stopScroll();
 		if (cellIndex < 0) 
 			cellIndex = 0;
 		else if (cellIndex > this.count - 1) 
 			cellIndex = this.count - 1;
 		var index:int;
+		var showCount:int;
 		if (!this._isHorizontal)
+		{
 			index = Math.ceil((cellIndex + 1) / this.dspColumns) - 1;
+			showCount = Math.floor(this.viewHeight / this.itemHeight);
+		}
 		else
+		{
 			index = Math.ceil((cellIndex + 1) / this.dspRows) - 1;
-		if (!this._isHorizontal)
+			showCount = Math.floor(this.viewWidth / this.itemWidth);
+		}
+		if (this.totalLineCount < this.getShowLineCount())
 		{
-			if (this.content.height > this.viewHeight)
-			{
-				this.content.y = -this.itemHeight * index;
-				if (this.content.y < this.viewHeight - this.content.height)
-					this.content.y = this.viewHeight - this.content.height;
-			}
+			index = 0;
 		}
 		else
 		{
-			if (this.content.width > this.viewWidth) 
-			{
-				this.content.x = -this.itemWidth * index;
-				if (this.content.x < this.viewWidth - this.content.width)
-					this.content.x = this.viewWidth - this.content.width;
-			}
+			var lastIndex:int = this.getLastLineIndex();
+			if (index > lastIndex - showCount)
+				index = lastIndex - showCount;
 		}
+		if (!this._isHorizontal)
+			this.content.y = -this.itemHeight * index;
+		else
+			this.content.x = -this.itemWidth * index;
+		var startIndex:int = index - 1;
+		if (startIndex < 0) startIndex = 0;
+		this.curIndex = startIndex;
+		for (var i:int = 0; i < this.cellList.length; i++)
+		{
+			var cell:Cell = this.cellList[i];
+			if (!this._isHorizontal)
+			{
+				cell.index = startIndex;
+				cell.row = cell.index;
+				cell.y = startIndex * this.itemHeight;
+			}
+			else
+			{
+				cell.index = startIndex;
+				cell.column = cell.index;
+				cell.x = startIndex * this.itemWidth;
+			}
+			startIndex++;
+		}
+		this.updateCell();
 	}
 	
 	override protected function loopHandler():void 
