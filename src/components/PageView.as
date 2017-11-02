@@ -22,7 +22,7 @@ public class PageView extends ScrollView
 	private var oneLineCellCount:int = 0;
 	//总的可显示页数
 	private static const MAX_SHOW_PAGE_COUNT:int = 3;
-	public var curPageIndex:int;
+	public var curPageIndex:int = 0;
 	public var updateTableCell:Handler;
 	public function PageView() 
 	{
@@ -71,7 +71,6 @@ public class PageView extends ScrollView
 		this.totalPageCount = Math.ceil(this.count / (this.dspColumns * this.dspRows));
 		this.showPageCount = MAX_SHOW_PAGE_COUNT;
 		if (this.totalPageCount < this.showPageCount) this.showPageCount = this.totalPageCount;
-		this.curPageIndex = 0;
 		if (!this._isHorizontal)
 			this.setContentSize(this.viewWidth, this.viewHeight * this.totalPageCount);
 		else
@@ -85,6 +84,7 @@ public class PageView extends ScrollView
 	{
 		this.removeAllCell();
 		this.cellList = [];
+		this.curPageIndex = 0;
 		for (var i:int = 0; i < this.showPageCount; i++) 
 		{
 			this.createOnePageCell(i, this._isHorizontal);
@@ -181,6 +181,9 @@ public class PageView extends ScrollView
 		{
 			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth / 2 && this.curPageIndex < this.totalPageCount - 1)
 			{
+				trace("this.curPageIndex", this.curPageIndex);
+				trace("this.content.x + this.viewWidth * this.curPageIndex", this.content.x + this.viewWidth * this.curPageIndex);
+				trace("-this.viewWidth / 2", -this.viewWidth / 2);
 				//下一页
 				this.curPageIndex++;
 				this.removeTween();
