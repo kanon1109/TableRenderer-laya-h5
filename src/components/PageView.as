@@ -124,17 +124,18 @@ public class PageView extends ScrollView
 		var cell:Cell = this.getPageCellByIndex(this.curPageIndex);
 		if (this._isHorizontal)
 		{
-			if (this.content.x <= cell.width / 2 * (this.curPageIndex - 1) && this.curPageIndex < this.totalPageCount - 1)
-			{
-				//上一页
-				trace("上一页");
-				this.curPageIndex++;
-				trace("this.curPageIndex", this.curPageIndex);
-			}
-			else if (this.content.x >= cell.width / 2 * (this.curPageIndex + 1) && this.curPageIndex > 0)
+			trace("totalPageCount", totalPageCount);
+			if (this.content.x + cell.width * this.curPageIndex <= -cell.width / 2 && this.curPageIndex < this.totalPageCount - 1)
 			{
 				//下一页
 				trace("下一页");
+				this.curPageIndex++;
+				trace("this.curPageIndex", this.curPageIndex);
+			}
+			else if (this.content.x + cell.width * this.curPageIndex >= cell.width / 2 && this.curPageIndex > 0)
+			{
+				//上一页
+				trace("上一页");
 				this.curPageIndex--;
 				trace("this.curPageIndex", this.curPageIndex);
 			}
