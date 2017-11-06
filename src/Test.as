@@ -33,7 +33,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 20;
+		this.count = 23;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -97,8 +97,8 @@ public class Test
 			label = cell.getChildByName("txt") as Label;
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		label.text = "r: " + cell.row + ", i" + (cell.index + 1);
-		//label.text = "r: " + cell.column + ", i" + (cell.index + 1);
+		//label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		label.text = "r: " + cell.column + ", i" + (cell.index + 1);
 		//label.text = cell.index.toString();
 	}
 	
@@ -148,7 +148,7 @@ public class Test
 	{
 		var cellIndex:int = Random.randint(0, this.count - 1);
 		//cellIndex = this.count - 1;
-		//cellIndex = 7;
+		//cellIndex = 22;
 		this.label.text = "数量:" + this.count + " cellIndex:" + (cellIndex + 1);
 		this.tableView.scrollToIndex(cellIndex);
 	}

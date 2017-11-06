@@ -478,6 +478,7 @@ public class TableView extends ScrollView
 			cellIndex = this.count - 1;
 		var index:int;
 		var showCount:int;
+		var isLastLineIndex:Boolean;
 		if (!this._isHorizontal)
 		{
 			index = Math.ceil((cellIndex + 1) / this.dspColumns) - 1;
@@ -495,33 +496,45 @@ public class TableView extends ScrollView
 		else
 		{
 			var lastIndex:int = this.getLastLineIndex();
+			isLastLineIndex = index == lastIndex;
 			if (index > lastIndex - showCount)
 				index = lastIndex - showCount;
 		}
-		if (!this._isHorizontal)
-			this.content.y = -this.itemHeight * index;
+		if (!isLastLineIndex)
+		{
+			if (!this._isHorizontal)
+				this.content.y = -this.itemHeight * index;
+			else
+				this.content.x = -this.itemWidth * index;
+		}
 		else
-			this.content.x = -this.itemWidth * index;
+		{
+			if (!this._isHorizontal)
+				this.content.y = this.viewHeight - this.content.height;
+			else
+				this.content.x = this.viewWidth - this.content.width;
+		}
 		var startIndex:int = index - 1;
 		if (startIndex < 0) startIndex = 0;
 		this.curIndex = startIndex;
 		for (var i:int = 0; i < this.cellList.length; i++)
 		{
 			var cell:Cell = this.cellList[i];
+			cell.index = startIndex;
 			if (!this._isHorizontal)
 			{
-				cell.index = startIndex;
 				cell.row = cell.index;
 				cell.y = startIndex * this.itemHeight;
 			}
 			else
 			{
-				cell.index = startIndex;
 				cell.column = cell.index;
 				cell.x = startIndex * this.itemWidth;
 			}
 			startIndex++;
 		}
+		trace("startIndex", startIndex);
+		trace("curIndex", curIndex);
 		this.updateCell();
 		this.debugDrawContentBound();
 	}
