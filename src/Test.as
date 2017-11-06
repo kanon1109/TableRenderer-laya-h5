@@ -2,6 +2,7 @@ package
 {
 import components.Cell;
 import components.ListView;
+import components.PageView;
 import components.ScrollView;
 import components.TableView;
 import laya.display.Stage;
@@ -22,6 +23,7 @@ public class Test
 	private var scrollList:ListView;
 	private var scroll:ScrollView;
 	private var tableView:TableView;
+	private var pageView:PageView;
 	
 	private var itemList:Array;
 	private var count:int;
@@ -54,16 +56,22 @@ public class Test
 		Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
-		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
+		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 500);
 		this.tableView.x = 100;
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
 		this.tableView.isHorizontal = true;
+		//Laya.stage.addChild(this.tableView);
 
-		//this.tableView.isHorizontal = true;
-		Laya.stage.addChild(this.tableView);
-		
+		this.pageView = new PageView();
+		this.pageView.init(this.itemList.length, false, 700, 500, 124 + 10, 500);
+		this.pageView.x = 100;
+		this.pageView.y = 50;
+		this.pageView.isShowDebug = true;
+		this.pageView.isHorizontal = true;
+		Laya.stage.addChild(this.pageView);
+
 		this.label = new Label();
 		this.label.color = "#FF0000";
 		this.label.fontSize = 20;
