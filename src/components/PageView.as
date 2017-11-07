@@ -1,6 +1,9 @@
 package components 
 {
+import laya.ui.Label;
+import laya.utils.Ease;
 import laya.utils.Handler;
+import laya.utils.Tween;
 /**
  * ...翻页滚动组件
  * @author ...Kanon
@@ -13,7 +16,7 @@ public class PageView extends ScrollView
 	private var dspColumns:int;//一屏显示几列
 	private var count:int;//数据总数量
 	private var totalPageCount:int; //总页数
-	private var showPageCount:int; //总页数
+	private var showPageCount:int; //可显示的总页数
 	private var cellList:Array;
 	//一行或一列的显示数量
 	private var oneLineCellCount:int = 0;
@@ -62,13 +65,17 @@ public class PageView extends ScrollView
 	{
 		this.count = count;
 		this.totalPageCount = Math.floor(this.count / (this.dspColumns * this.dspRows));
-		this.showPageCount = 2;
-		if (this.totalPageCount <= 1) this.showPageCount = 1;
+		//trace("this.dspColumns", this.dspColumns);
+		//trace("this.dspRows", this.dspRows);
+		this.showPageCount = 3;
+		if (this.totalPageCount < this.showPageCount) this.showPageCount = this.totalPageCount;
 		this.curPageIndex = 0;
 		if (!this._isHorizontal)
-			this.setContentSize(this.viewWidth, this.viewHeight * this.showPageCount);
+			this.setContentSize(this.viewWidth, this.viewHeight * this.totalPageCount);
 		else
-			this.setContentSize(this.viewWidth * this.showPageCount, this.viewHeight);
+			this.setContentSize(this.viewWidth * this.totalPageCount, this.viewHeight);
+		trace("this.showPageCount", this.showPageCount);
+		trace("this.totalPageCount", this.totalPageCount);
 	}
 	
 	/**
@@ -86,6 +93,12 @@ public class PageView extends ScrollView
 			cell.index = i;
 			if (this._isHorizontal) cell.x = i * cell.width;
 			else cell.y = i * cell.height;
+			var text:Label = new Label(i.toString());
+			text.fontSize = 30;
+			text.color = "#FF0000";
+			text.name = "txt";
+			//text.x = this.viewWidth - text.width;
+			cell.addChild(text);
 			this.content.addChild(cell);
 			this.cellList.push(cell);
 		}
@@ -121,27 +134,59 @@ public class PageView extends ScrollView
 	private function scrollPage():void
 	{
 		if (this.isTouched) return;
-		var cell:Cell = this.getPageCellByIndex(this.curPageIndex);
+		var cell:Cell;
 		if (this._isHorizontal)
 		{
-			trace("totalPageCount", totalPageCount);
-			if (this.content.x + cell.width * this.curPageIndex <= -cell.width / 2 && this.curPageIndex < this.totalPageCount - 1)
+			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth / 2 && this.curPageIndex < this.totalPageCount - 1)
 			{
 				//下一页
-				trace("下一页");
 				this.curPageIndex++;
-				trace("this.curPageIndex", this.curPageIndex);
+				this.removeTween();
+				this.speed = 0;
+				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				if (this.curPageIndex >= this.showPageCount - 1 && 
+					this.curPageIndex < this.totalPageCount - 1 &&
+					this.showPageCount < this.totalPageCount)
+				{
+					//交换cell
+					trace("交换cell");
+					cell = this.cellList.shift();
+					this.cellList.push(cell);
+					cell.index = this.curPageIndex + 1;
+					cell.x = (this.curPageIndex + 1) * this.viewWidth;
+					var txt:Label = cell.getChildByName("txt") as Label;
+					txt.text = cell.index.toString();
+				}
 			}
-			else if (this.content.x + cell.width * this.curPageIndex >= cell.width / 2 && this.curPageIndex > 0)
+			else if (this.content.x + this.viewWidth * this.curPageIndex >= this.viewWidth / 2 && this.curPageIndex > 0)
 			{
 				//上一页
-				trace("上一页");
 				this.curPageIndex--;
-				trace("this.curPageIndex", this.curPageIndex);
+				this.removeTween();
+				this.speed = 0;
+				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				if (this.curPageIndex > 0 && 
+					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
+					this.showPageCount < this.totalPageCount)
+				{
+					//交换cell
+					trace("上一页 交换cell");
+					cell = this.cellList.pop();
+					this.cellList.unshift(cell);
+					cell.index = this.curPageIndex - 1;
+					cell.x = (this.curPageIndex - 1) * this.viewWidth;
+					var txt:Label = cell.getChildByName("txt") as Label;
+					txt.text = cell.index.toString();
+				}
 			}
 			else
 			{
 				//弹回
+				this.speed = 0;
+				if (!this.tween) 
+					this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
 			}
 		}
 		else

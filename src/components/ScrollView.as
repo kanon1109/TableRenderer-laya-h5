@@ -29,15 +29,15 @@ public class ScrollView extends Sprite
 	//动画
 	protected var tween:Tween;
 	//最大速度
-	private const SPEED_MAX:int = 40;
+	protected const SPEED_MAX:int = 40;
 	//回弹时间
-	private var bounceDuration:int;
+	protected var bounceDuration:int;
 	//速度
-	private var speed:Number;
+	protected var speed:Number;
 	//运动摩擦力
-	private var friction:Number;
+	protected var friction:Number;
 	//上一次鼠标位置
-	private var prevMousePos:Point;
+	protected var prevMousePos:Point;
 	//是否显示调试内容框
 	protected var _isShowDebug:Boolean;
 	public function ScrollView() 
@@ -121,7 +121,7 @@ public class ScrollView extends Sprite
 		this.viewHeight = height;
 		this.width = width;
 		this.height = height;
-		this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
+		//this.scrollRect = new Rectangle(0, 0, this.viewWidth, this.viewHeight);
 		this.debugDrawContentBound();
 	}
 	
@@ -222,7 +222,7 @@ public class ScrollView extends Sprite
 	/**
 	 * 更新滚动速度
 	 */
-	private function updateScrollSpeed():void
+	protected function updateScrollSpeed():void
 	{
 		if (this.isTouched)
 		{
@@ -314,7 +314,6 @@ public class ScrollView extends Sprite
 	{
 		this.updateScrollSpeed();
 		this.isTouched = false;
-		
 	}
 	
 	//帧循环

@@ -35,7 +35,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 23;
+		this.count = 50;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
