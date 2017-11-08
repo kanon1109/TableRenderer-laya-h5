@@ -97,7 +97,6 @@ public class PageView extends ScrollView
 			text.fontSize = 30;
 			text.color = "#FF0000";
 			text.name = "txt";
-			//text.x = this.viewWidth - text.width;
 			cell.addChild(text);
 			this.content.addChild(cell);
 			this.cellList.push(cell);
@@ -144,7 +143,7 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
 					this.curPageIndex < this.totalPageCount - 1 &&
 					this.showPageCount < this.totalPageCount)
@@ -166,7 +165,7 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex > 0 && 
 					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
 					this.showPageCount < this.totalPageCount)
@@ -191,7 +190,57 @@ public class PageView extends ScrollView
 		}
 		else
 		{
-			
+			if (this.content.y + this.viewHeight * this.curPageIndex <= -this.viewHeight / 2 && this.curPageIndex < this.totalPageCount - 1)
+			{
+				//下一页
+				this.curPageIndex++;
+				this.removeTween();
+				this.speed = 0;
+				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				if (this.curPageIndex >= this.showPageCount - 1 && 
+					this.curPageIndex < this.totalPageCount - 1 &&
+					this.showPageCount < this.totalPageCount)
+				{
+					//交换cell
+					trace("交换cell");
+					cell = this.cellList.shift();
+					this.cellList.push(cell);
+					cell.index = this.curPageIndex + 1;
+					cell.y = (this.curPageIndex + 1) * this.viewHeight;
+					var txt:Label = cell.getChildByName("txt") as Label;
+					txt.text = cell.index.toString();
+				}
+			}
+			else if (this.content.y + this.viewHeight * this.curPageIndex >= this.viewHeight / 2 && this.curPageIndex > 0)
+			{
+				//上一页
+				this.curPageIndex--;
+				this.removeTween();
+				this.speed = 0;
+				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				if (this.curPageIndex > 0 && 
+					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
+					this.showPageCount < this.totalPageCount)
+				{
+					//交换cell
+					trace("上一页 交换cell");
+					cell = this.cellList.pop();
+					this.cellList.unshift(cell);
+					cell.index = this.curPageIndex - 1;
+					cell.y = (this.curPageIndex - 1) * this.viewHeight;
+					var txt:Label = cell.getChildByName("txt") as Label;
+					txt.text = cell.index.toString();
+				}
+			}
+			else
+			{
+				//弹回
+				this.speed = 0;
+				if (!this.tween) 
+					this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+			}
 		}
 	}
 	

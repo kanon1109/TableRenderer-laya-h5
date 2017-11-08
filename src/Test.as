@@ -61,7 +61,7 @@ public class Test
 		this.tableView.y = 50;
 		this.tableView.isShowDebug = true;
 		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		this.tableView.isHorizontal = true;
+		this.tableView.isHorizontal = false;
 		//Laya.stage.addChild(this.tableView);
 
 		this.pageView = new PageView();
@@ -69,7 +69,7 @@ public class Test
 		this.pageView.x = 100;
 		this.pageView.y = 50;
 		this.pageView.isShowDebug = true;
-		this.pageView.isHorizontal = true;
+		this.pageView.isHorizontal = false;
 		Laya.stage.addChild(this.pageView);
 
 		this.label = new Label();
