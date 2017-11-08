@@ -20,6 +20,8 @@ public class PageView extends ScrollView
 	private var cellList:Array;
 	//一行或一列的显示数量
 	private var oneLineCellCount:int = 0;
+	//总的可显示页数
+	private static const MAX_SHOW_PAGE_COUNT:int = 3;
 	public var curPageIndex:int;
 	public var updateTableCell:Handler;
 	public function PageView() 
@@ -47,14 +49,16 @@ public class PageView extends ScrollView
 	{
 		if (!this._isHorizontal)
 		{
-			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth);
-			this.dspRows = Math.ceil(this.viewHeight / this.itemHeight);//行
+			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth);
+			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);//行
 		}
 		else
 		{
-			this.dspColumns = Math.ceil(this.viewWidth / this.itemWidth); //列
-			this.dspRows = Math.ceil(this.viewHeight / this.itemHeight);
+			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth); //列
+			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
 		}
+		trace("this.dspColumns", this.dspColumns);
+		trace("this.dspRows", this.dspRows);
 	}
 	
 	/**
@@ -64,18 +68,14 @@ public class PageView extends ScrollView
 	private function updatePages(count:int):void
 	{
 		this.count = count;
-		this.totalPageCount = Math.floor(this.count / (this.dspColumns * this.dspRows));
-		//trace("this.dspColumns", this.dspColumns);
-		//trace("this.dspRows", this.dspRows);
-		this.showPageCount = 3;
+		this.totalPageCount = Math.ceil(this.count / (this.dspColumns * this.dspRows));
+		this.showPageCount = MAX_SHOW_PAGE_COUNT;
 		if (this.totalPageCount < this.showPageCount) this.showPageCount = this.totalPageCount;
 		this.curPageIndex = 0;
 		if (!this._isHorizontal)
 			this.setContentSize(this.viewWidth, this.viewHeight * this.totalPageCount);
 		else
 			this.setContentSize(this.viewWidth * this.totalPageCount, this.viewHeight);
-		trace("this.showPageCount", this.showPageCount);
-		trace("this.totalPageCount", this.totalPageCount);
 	}
 	
 	/**
@@ -87,21 +87,42 @@ public class PageView extends ScrollView
 		this.cellList = [];
 		for (var i:int = 0; i < this.showPageCount; i++) 
 		{
-			var cell:Cell = new Cell();
-			cell.width = this.viewWidth;
-			cell.height = this.viewHeight;
-			cell.index = i;
-			if (this._isHorizontal) cell.x = i * cell.width;
-			else cell.y = i * cell.height;
-			var text:Label = new Label(i.toString());
-			text.fontSize = 30;
-			text.color = "#FF0000";
-			text.name = "txt";
-			cell.addChild(text);
-			this.content.addChild(cell);
-			this.cellList.push(cell);
+			this.createOnePageCell(i, this._isHorizontal);
 		}
 		this.debugDrawContentBound();
+	}
+	
+	/**
+	 * 创建一个新页
+	 * @param	pageIndex		页数索引
+	 * @param	isHorizontal	是否横向
+	 */
+	private function createOnePageCell(pageIndex:int, isHorizontal:Boolean):void
+	{
+		var cell:Cell = new Cell();
+		cell.width = this.viewWidth;
+		cell.height = this.viewHeight;
+		cell.index = pageIndex;
+		if (isHorizontal) cell.x = pageIndex * cell.width;
+		else cell.y = pageIndex * cell.height;
+		//创建行列
+		for (var j:int = 0; j < this.dspRows; j++) 
+		{
+			for (var k:int = 0; k < this.dspColumns; k++) 
+			{
+				var c:Cell = new Cell();
+				c.width = this.itemWidth;
+				c.height = this.itemHeight;
+				c.x = k * this.itemHeight;
+				c.y = j * this.itemWidth;
+				c.row = j;
+				c.column = k;
+				c.name = "c" + j + "_" + k; 
+				cell.addChild(c);
+			}
+		}
+		this.content.addChild(cell);
+		this.cellList.push(cell);
 	}
 	
 	/**
@@ -109,7 +130,29 @@ public class PageView extends ScrollView
 	 */
 	private function updateCell():void
 	{
-		
+		if (!this.cellList || this.cellList.length == 0) return;
+		for (var i:int = 0; i < this.cellList.length; ++i) 
+		{
+			var cell:Cell = this.cellList[i];
+			var index:int = cell.index * this.dspColumns * this.dspRows;
+			var isLastPage:Boolean = cell.index == this.totalPageCount - 1;
+			for (var j:int = 0; j < this.dspRows; j++) 
+			{
+				for (var k:int = 0; k < this.dspColumns; k++) 
+				{
+					var c:Cell = cell.getChildByName("c" + j + "_" + k) as Cell;
+					c.row = j;
+					c.column = k;
+					c.index = index;
+					if (isLastPage) c.visible = index < this.count;
+					else c.visible = true;
+					index++;
+					//最后一行或一列
+					if (this.updateTableCell && c.visible) 
+						this.updateTableCell.runWith(c);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -143,7 +186,7 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
+				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
 					this.curPageIndex < this.totalPageCount - 1 &&
 					this.showPageCount < this.totalPageCount)
@@ -154,8 +197,6 @@ public class PageView extends ScrollView
 					this.cellList.push(cell);
 					cell.index = this.curPageIndex + 1;
 					cell.x = (this.curPageIndex + 1) * this.viewWidth;
-					var txt:Label = cell.getChildByName("txt") as Label;
-					txt.text = cell.index.toString();
 				}
 			}
 			else if (this.content.x + this.viewWidth * this.curPageIndex >= this.viewWidth / 2 && this.curPageIndex > 0)
@@ -176,8 +217,6 @@ public class PageView extends ScrollView
 					this.cellList.unshift(cell);
 					cell.index = this.curPageIndex - 1;
 					cell.x = (this.curPageIndex - 1) * this.viewWidth;
-					var txt:Label = cell.getChildByName("txt") as Label;
-					txt.text = cell.index.toString();
 				}
 			}
 			else
@@ -208,8 +247,6 @@ public class PageView extends ScrollView
 					this.cellList.push(cell);
 					cell.index = this.curPageIndex + 1;
 					cell.y = (this.curPageIndex + 1) * this.viewHeight;
-					var txt:Label = cell.getChildByName("txt") as Label;
-					txt.text = cell.index.toString();
 				}
 			}
 			else if (this.content.y + this.viewHeight * this.curPageIndex >= this.viewHeight / 2 && this.curPageIndex > 0)
@@ -230,8 +267,6 @@ public class PageView extends ScrollView
 					this.cellList.unshift(cell);
 					cell.index = this.curPageIndex - 1;
 					cell.y = (this.curPageIndex - 1) * this.viewHeight;
-					var txt:Label = cell.getChildByName("txt") as Label;
-					txt.text = cell.index.toString();
 				}
 			}
 			else
@@ -260,6 +295,7 @@ public class PageView extends ScrollView
 	{
 		super.loopHandler();
 		this.scrollPage();
+		this.updateCell();
 	}
 	
 	override protected function debugDrawContentBound():void 
@@ -271,9 +307,70 @@ public class PageView extends ScrollView
 			{
 				var cell:Cell = this.cellList[i];
 				cell.graphics.clear(true);
-				if (this._isShowDebug) cell.graphics.drawRect(0, 0, this.viewWidth, this.viewHeight, null, "#00FFFF");
+				for (var j:int = 0; j < this.dspRows; j++) 
+				{
+					for (var k:int = 0; k < this.dspColumns; k++) 
+					{
+						var c:Cell = cell.getChildByName("c" + j + "_" + k) as Cell;
+						c.graphics.clear(true);
+					}
+				}
+				if (this._isShowDebug) 
+				{
+					cell.graphics.drawRect(0, 0, this.viewWidth, this.viewHeight, null, "#00FFFF");
+					for (var j:int = 0; j < this.dspRows; j++) 
+					{
+						for (var k:int = 0; k < this.dspColumns; k++) 
+						{
+							var c:Cell = cell.getChildByName("c" + j + "_" + k) as Cell;
+							c.graphics.drawRect(0, 0, this.itemWidth, this.itemHeight, null, "#FFFF00", .5);
+						}
+					}
+				}
 			}
 		}
+	}
+	
+	/**
+	 * 更新数据数量
+	 * @param	count	数量
+	 */
+	public function reloadData(count:int):void
+	{
+		if (count < 0) return;
+		this.stopScroll();
+		var diffCount:int = count - this.count;
+		if (diffCount == 0) return;
+		var prevX:Number = this.content.x;
+		var prevY:Number = this.content.y;
+		this.content.x = 0;
+		this.content.y = 0;
+		//新的总页数
+		var newShowPageCount:int = MAX_SHOW_PAGE_COUNT;
+		var newTotalPageCount:int = Math.ceil(count / (this.dspColumns * this.dspRows));
+		if (newTotalPageCount < newShowPageCount) newShowPageCount = newTotalPageCount;
+		if (diffCount > 0)
+		{
+			trace("newShowPageCount", newShowPageCount);
+			trace("newTotalPageCount", newTotalPageCount);
+			//增加
+			var addPage:int = newShowPageCount - this.totalPageCount;
+			if (addPage < 0) addPage = 0; //新的一屏行数与总行数相减
+			trace("addpage", addPage);
+			for (var i:int = 0; i < addPage; i++)
+			{
+				var lineIndex:int = this.showPageCount + i;
+				this.createOnePageCell(lineIndex, this._isHorizontal);
+			}
+		}
+		else if (diffCount < 0)
+		{
+			//减少
+		}
+		
+		this.content.x = prevX;
+		this.content.y = prevY;
+		this.updatePages(count);
 	}
 	
 	override public function get isHorizontal():Boolean{ return super.isHorizontal; }

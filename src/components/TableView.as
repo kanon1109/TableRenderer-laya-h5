@@ -323,13 +323,13 @@ public class TableView extends ScrollView
 		var newTotalLineCount:int;
 		if (!this._isHorizontal)
 		{
-			var newTotalRows = Math.ceil(count / this.dspColumns);
+			var newTotalRows:int = Math.ceil(count / this.dspColumns);
 			if (newTotalRows < newShowLineCount) newShowLineCount = newTotalRows;
 			newTotalLineCount = newTotalRows;
 		}
 		else
 		{
-			var newTotalColumns = Math.ceil(count / this.dspRows);
+			var newTotalColumns:int = Math.ceil(count / this.dspRows);
 			if (newTotalColumns < newShowLineCount) newShowLineCount = newTotalColumns;
 			newTotalLineCount = newTotalColumns;
 		}
@@ -337,6 +337,9 @@ public class TableView extends ScrollView
 		{
 			//增加
 			var addLine:int = newShowLineCount - this.totalLineCount;
+			trace("newShowLineCount", newShowLineCount);
+			trace("totalLineCount", totalLineCount);
+			trace("addLine", addLine);
 			if (addLine < 0) addLine = 0; //新的一屏行数与总行数相减
 			for (var i:int = 0; i < addLine; i++)
 			{

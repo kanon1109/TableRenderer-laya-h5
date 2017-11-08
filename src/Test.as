@@ -35,7 +35,7 @@ public class Test
 		Laya.stage.bgColor = "#0F1312";
 		
 		this.count = Random.randint(0, 130);
-		this.count = 50;
+		this.count = 0;
 		this.updateData();
 		
 		//this.scrollList = new ListView();
@@ -53,23 +53,24 @@ public class Test
 		this.scroll.y = 50;
 		this.scroll.isShowDebug = true;
 		this.scroll.isHorizontal = true;
-		Laya.stage.addChild(this.scroll);
+		//Laya.stage.addChild(this.scroll);
 		
-		this.tableView = new TableView();
-		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 500);
-		this.tableView.x = 100;
-		this.tableView.y = 50;
-		this.tableView.isShowDebug = true;
-		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		this.tableView.isHorizontal = false;
+		//this.tableView = new TableView();
+		//this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 500);
+		//this.tableView.x = 100;
+		//this.tableView.y = 50;
+		//this.tableView.isShowDebug = true;
+		//this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
+		//this.tableView.isHorizontal = true;
 		//Laya.stage.addChild(this.tableView);
 
 		this.pageView = new PageView();
-		this.pageView.init(this.itemList.length, false, 700, 500, 124 + 10, 500);
+		this.pageView.init(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.pageView.x = 100;
 		this.pageView.y = 50;
 		this.pageView.isShowDebug = true;
-		this.pageView.isHorizontal = false;
+		this.pageView.isHorizontal = true;
+		this.pageView.updateTableCell = new Handler(this, updateTableCellHandler);
 		Laya.stage.addChild(this.pageView);
 
 		this.label = new Label();
@@ -93,7 +94,8 @@ public class Test
 		{
 			bg = new Image("res/bg.png");
 			cell.addChild(bg);
-			
+			bg.x = 10;
+			bg.y = 10;
 			label = new Label();
 			label.name = "txt";
 			label.fontSize = 24;
@@ -106,8 +108,8 @@ public class Test
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
 		//label.text = "r: " + cell.row + ", i" + (cell.index + 1);
-		label.text = "r: " + cell.column + ", i" + (cell.index + 1);
-		//label.text = cell.index.toString();
+		//label.text = "r: " + cell.column + ", i" + (cell.index + 1);
+		label.text = cell.index.toString();
 	}
 	
 	private function loadImgComplete():void
@@ -175,12 +177,13 @@ public class Test
 	private function addBtnClickHandler():void 
 	{
 		//this.count += 44;
-		this.count ++;
+		this.count += 15;
 		trace("上一次数量" + this.count);
-		this.count = Random.randint(0, 130);
+		//this.count = Random.randint(0, 130);
 		//this.count = 16;
 		this.updateData();
-		this.tableView.reloadData(this.itemList.length);
+		//this.tableView.reloadData(this.itemList.length);
+		this.pageView.reloadData(this.itemList.length);
 		this.label.text = "数量:" + this.count;
 	}
 	
