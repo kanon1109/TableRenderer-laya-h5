@@ -6,6 +6,8 @@ import laya.utils.Handler;
 import laya.utils.Tween;
 /**
  * ...翻页滚动组件
+ * bug [] 为解决
+ * 加到第4个page时不显示。
  * @author ...Kanon
  */
 public class PageView extends ScrollView 
@@ -349,13 +351,14 @@ public class PageView extends ScrollView
 		this.content.x = 0;
 		this.content.y = 0;
 		//新的总页数
-		var newShowPageCount:int = MAX_SHOW_PAGE_COUNT;
+		var newShowPageCount:int = MAX_SHOW_PAGE_COUNT; //新的可显示的页数 范围在 1-3
 		var newTotalPageCount:int = Math.ceil(count / (this.dspColumns * this.dspRows));
 		if (newTotalPageCount < newShowPageCount) newShowPageCount = newTotalPageCount;
 		if (diffCount > 0)
 		{
-			trace("newShowPageCount", newShowPageCount);
-			trace("newTotalPageCount", newTotalPageCount);
+			//trace("newShowPageCount", newShowPageCount);
+			//trace("newTotalPageCount", newTotalPageCount);
+			//trace("totalPageCount", totalPageCount);
 			//增加
 			var addPage:int = newShowPageCount - this.totalPageCount;
 			if (addPage < 0) addPage = 0; //新的一屏行数与总行数相减
@@ -365,14 +368,46 @@ public class PageView extends ScrollView
 				var lineIndex:int = this.showPageCount + i;
 				this.createOnePageCell(lineIndex, this._isHorizontal);
 			}
+			
+			if (this.curPageIndex >= this.totalPageCount - 1 && 
+				newTotalPageCount > this.totalPageCount && 
+				addPage == 0)
+			{
+				//如果当前是最后一页，则使用page循环来代替增加新的一页
+				//trace("curPageIndex", this.curPageIndex);
+				var cell:Cell = this.cellList.shift();
+				this.cellList.push(cell);
+				cell.index = this.curPageIndex + 1;
+				cell.x = (this.curPageIndex + 1) * this.viewWidth;
+			}
 		}
 		else if (diffCount < 0)
 		{
 			//减少
+			trace("newShowPageCount ", newShowPageCount);
+			trace("this.curPageIndex ", this.curPageIndex);
+			trace("this.totalPageCount ", this.totalPageCount);
+			trace("newTotalPageCount ", newTotalPageCount);
+			
+			//判断newShowPageCount是否小于MAX_SHOW_PAGE_COUNT
+			if (newShowPageCount < MAX_SHOW_PAGE_COUNT && this.totalPageCount <= MAX_SHOW_PAGE_COUNT)
+			{
+				var reducePage:int= this.totalPageCount - newShowPageCount;
+				if (reducePage < 0) reducePage = 0;
+				for (var i:int = 0; i < reducePage; i++)
+				{
+					var cell:Cell = this.cellList.pop();
+					cell.removeSelf();
+				}
+			}
+			else
+			{
+				
+			}
 		}
-		
 		this.content.x = prevX;
 		this.content.y = prevY;
+		//更新页数
 		this.updatePages(count);
 	}
 	

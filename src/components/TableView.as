@@ -9,6 +9,7 @@ import laya.utils.Handler;
  * bug [] 为解决
  * [第0为的cell不执行update]
  * [最后一位的cell不执行update]
+ * 
  */
 public class TableView extends ScrollView
 {

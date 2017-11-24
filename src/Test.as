@@ -160,30 +160,34 @@ public class Test
 		//cellIndex = this.count - 1;
 		//cellIndex = 22;
 		this.label.text = "数量:" + this.count + " cellIndex:" + (cellIndex + 1);
-		this.tableView.scrollToIndex(cellIndex);
+		if (this.tableView) this.tableView.scrollToIndex(cellIndex);
 	}
 	
 	private function reduceBtnClickHandler():void 
 	{
-		//this.count -= 3;
-		this.tableView.isShowDebug = !this.tableView.isShowDebug;
-		this.count--;
+		this.count -= 3;
+		//this.count -= 15;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
-		this.tableView.reloadData(this.itemList.length);
+		if (this.tableView) 
+		{
+			this.tableView.isShowDebug = !this.tableView.isShowDebug;
+			this.tableView.reloadData(this.itemList.length);
+		}
+		if (this.pageView) this.pageView.reloadData(this.itemList.length);
 		this.label.text = "数量:" + this.count;
 	}
 	
 	private function addBtnClickHandler():void 
 	{
 		//this.count += 44;
-		this.count += 15;
+		this.count += 10;
 		trace("上一次数量" + this.count);
 		//this.count = Random.randint(0, 130);
 		//this.count = 16;
 		this.updateData();
-		//this.tableView.reloadData(this.itemList.length);
-		this.pageView.reloadData(this.itemList.length);
+		if (this.tableView) this.tableView.reloadData(this.itemList.length);
+		if (this.pageView) this.pageView.reloadData(this.itemList.length);
 		this.label.text = "数量:" + this.count;
 	}
 	
