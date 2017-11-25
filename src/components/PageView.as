@@ -26,6 +26,7 @@ public class PageView extends ScrollView
 	private static const MAX_SHOW_PAGE_COUNT:int = 3;
 	public var curPageIndex:int = 0;
 	public var updateTableCell:Handler;
+	public var updatePageCell:Handler;
 	public function PageView() 
 	{
 		super();
@@ -188,6 +189,7 @@ public class PageView extends ScrollView
 				trace("-this.viewWidth / 2", -this.viewWidth / 2);
 				//下一页
 				this.curPageIndex++;
+				this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -208,6 +210,7 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
+				this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -229,7 +232,7 @@ public class PageView extends ScrollView
 				//弹回
 				this.speed = 0;
 				if (!this.tween) 
-					this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+					this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCell);
 			}
 		}
 		else
@@ -238,6 +241,7 @@ public class PageView extends ScrollView
 			{
 				//下一页
 				this.curPageIndex++;
+				this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -258,6 +262,7 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
+				this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -279,7 +284,7 @@ public class PageView extends ScrollView
 				//弹回
 				this.speed = 0;
 				if (!this.tween) 
-					this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
+					this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCell);
 			}
 		}
 	}
@@ -389,20 +394,31 @@ public class PageView extends ScrollView
 			trace("this.totalPageCount ", this.totalPageCount);
 			trace("newTotalPageCount ", newTotalPageCount);
 			
-			//判断newShowPageCount是否小于MAX_SHOW_PAGE_COUNT
-			if (newShowPageCount < MAX_SHOW_PAGE_COUNT && this.totalPageCount <= MAX_SHOW_PAGE_COUNT)
+			var reducePage:int = this.showPageCount - newTotalPageCount;
+			if (reducePage < 0) reducePage = 0;
+			trace("删除的页数", reducePage);
+			trace("curPageIndex", this.curPageIndex);
+			for (var i:int = 0; i < reducePage; i++)
 			{
-				var reducePage:int= this.totalPageCount - newShowPageCount;
-				if (reducePage < 0) reducePage = 0;
-				for (var i:int = 0; i < reducePage; i++)
-				{
-					var cell:Cell = this.cellList.pop();
-					cell.removeSelf();
-				}
+				var cell:Cell = this.cellList.pop();
+				cell.removeSelf();
 			}
-			else
+			
+			if (this.curPageIndex >= newTotalPageCount - 1)
 			{
+				this.curPageIndex = newTotalPageCount - 1;
+				var cell:Cell = this.cellList.pop();
+				this.cellList.unshift(cell);
+				cell.index = this.curPageIndex - 2;
+				cell.x = cell.index * this.viewWidth;
 				
+			}
+			trace("新curPageIndex", this.curPageIndex);
+
+			if (newTotalPageCount <= 1)
+			{
+				prevX = 0;
+				prevY = 0;
 			}
 		}
 		this.content.x = prevX;

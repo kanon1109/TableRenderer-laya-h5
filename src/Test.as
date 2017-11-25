@@ -20,6 +20,7 @@ import test.Random;
 public class Test 
 {
 	private var label:Label;
+	private var pageLabel:Label;
 	private var scrollList:ListView;
 	private var scroll:ScrollView;
 	private var tableView:TableView;
@@ -71,6 +72,7 @@ public class Test
 		this.pageView.isShowDebug = true;
 		this.pageView.isHorizontal = true;
 		this.pageView.updateTableCell = new Handler(this, updateTableCellHandler);
+		this.pageView.updatePageCell = new Handler(this, updatePageCellHandler);
 		Laya.stage.addChild(this.pageView);
 
 		this.label = new Label();
@@ -78,12 +80,24 @@ public class Test
 		this.label.fontSize = 20;
 		Laya.stage.addChild(this.label);
 		this.label.text = "数量:" + this.count;
+		
+		this.pageLabel = new Label();
+		this.pageLabel.color = "#FF0000";
+		this.pageLabel.fontSize = 20;
+		Laya.stage.addChild(this.pageLabel);
+		this.pageLabel.x = 300;
+		this.pageLabel.text = "第0页";
 
 		var arr:Array = [];
 		arr.push({url:"res/bg.png", type:Loader.IMAGE});
 		arr.push({url:"res/yellow.png", type:Loader.IMAGE});
 		Laya.loader.load(arr, Handler.create(this, loadImgComplete), null, Loader.IMAGE);
 		
+	}
+	
+	private function updatePageCellHandler():void 
+	{
+		this.pageLabel.text = "第" + this.pageView.curPageIndex + "页";
 	}
 	
 	private function updateTableCellHandler(cell:Cell):void 
@@ -165,8 +179,8 @@ public class Test
 	
 	private function reduceBtnClickHandler():void 
 	{
-		this.count -= 3;
-		//this.count -= 15;
+		//this.count -= 3;
+		this.count -= 30;
 		if (this.count < 0) this.count = 0;
 		this.updateData();
 		if (this.tableView) 
@@ -180,8 +194,8 @@ public class Test
 	
 	private function addBtnClickHandler():void 
 	{
-		//this.count += 44;
-		this.count += 10;
+		this.count += 44;
+		//this.count += 50;
 		trace("上一次数量" + this.count);
 		//this.count = Random.randint(0, 130);
 		//this.count = 16;
