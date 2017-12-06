@@ -60,8 +60,6 @@ public class PageView extends ScrollView
 			this.dspColumns = Math.floor(this.viewWidth / this.itemWidth); //列
 			this.dspRows = Math.floor(this.viewHeight / this.itemHeight);
 		}
-		trace("this.dspColumns", this.dspColumns);
-		trace("this.dspRows", this.dspRows);
 	}
 	
 	/**
@@ -184,22 +182,17 @@ public class PageView extends ScrollView
 		{
 			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth / 2 && this.curPageIndex < this.totalPageCount - 1)
 			{
-				trace("this.curPageIndex", this.curPageIndex);
-				trace("this.content.x + this.viewWidth * this.curPageIndex", this.content.x + this.viewWidth * this.curPageIndex);
-				trace("-this.viewWidth / 2", -this.viewWidth / 2);
 				//下一页
 				this.curPageIndex++;
 				this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
 					this.curPageIndex < this.totalPageCount - 1 &&
 					this.showPageCount < this.totalPageCount)
 				{
 					//交换cell
-					trace("交换cell");
 					cell = this.cellList.shift();
 					this.cellList.push(cell);
 					cell.index = this.curPageIndex + 1;
@@ -214,13 +207,11 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex > 0 && 
 					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
 					this.showPageCount < this.totalPageCount)
 				{
 					//交换cell
-					trace("上一页 交换cell");
 					cell = this.cellList.pop();
 					this.cellList.unshift(cell);
 					cell.index = this.curPageIndex - 1;
@@ -245,13 +236,11 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
 					this.curPageIndex < this.totalPageCount - 1 &&
 					this.showPageCount < this.totalPageCount)
 				{
 					//交换cell
-					trace("交换cell");
 					cell = this.cellList.shift();
 					this.cellList.push(cell);
 					cell.index = this.curPageIndex + 1;
@@ -266,13 +255,11 @@ public class PageView extends ScrollView
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
-				//trace("this.curPageIndex, this.showPageCount, this.totalPageCount", this.curPageIndex, this.showPageCount, this.totalPageCount);
 				if (this.curPageIndex > 0 && 
 					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
 					this.showPageCount < this.totalPageCount)
 				{
 					//交换cell
-					trace("上一页 交换cell");
 					cell = this.cellList.pop();
 					this.cellList.unshift(cell);
 					cell.index = this.curPageIndex - 1;
@@ -361,13 +348,9 @@ public class PageView extends ScrollView
 		if (newTotalPageCount < newShowPageCount) newShowPageCount = newTotalPageCount;
 		if (diffCount > 0)
 		{
-			//trace("newShowPageCount", newShowPageCount);
-			//trace("newTotalPageCount", newTotalPageCount);
-			//trace("totalPageCount", totalPageCount);
 			//增加
 			var addPage:int = newShowPageCount - this.totalPageCount;
 			if (addPage < 0) addPage = 0; //新的一屏行数与总行数相减
-			trace("addpage", addPage);
 			for (var i:int = 0; i < addPage; i++)
 			{
 				var lineIndex:int = this.showPageCount + i;
@@ -379,42 +362,41 @@ public class PageView extends ScrollView
 				addPage == 0)
 			{
 				//如果当前是最后一页，则使用page循环来代替增加新的一页
-				//trace("curPageIndex", this.curPageIndex);
 				var cell:Cell = this.cellList.shift();
 				this.cellList.push(cell);
 				cell.index = this.curPageIndex + 1;
-				cell.x = (this.curPageIndex + 1) * this.viewWidth;
+				if (this._isHorizontal)
+					cell.x = (this.curPageIndex + 1) * this.viewWidth;
+				else
+					cell.y = (this.curPageIndex + 1) * this.viewHeight;
 			}
 		}
 		else if (diffCount < 0)
 		{
 			//减少
-			trace("newShowPageCount ", newShowPageCount);
-			trace("this.curPageIndex ", this.curPageIndex);
-			trace("this.totalPageCount ", this.totalPageCount);
-			trace("newTotalPageCount ", newTotalPageCount);
-			
 			var reducePage:int = this.showPageCount - newTotalPageCount;
 			if (reducePage < 0) reducePage = 0;
-			trace("删除的页数", reducePage);
-			trace("curPageIndex", this.curPageIndex);
 			for (var i:int = 0; i < reducePage; i++)
 			{
 				var cell:Cell = this.cellList.pop();
 				cell.removeSelf();
 			}
 			
-			if (this.curPageIndex >= newTotalPageCount - 1)
+			if (newTotalPageCount > 0 && this.curPageIndex >= newTotalPageCount - 1)
 			{
+				//重新布局
 				this.curPageIndex = newTotalPageCount - 1;
-				var cell:Cell = this.cellList.pop();
-				this.cellList.unshift(cell);
-				cell.index = this.curPageIndex - 2;
-				cell.x = cell.index * this.viewWidth;
-				
+				for (var j:int = this.cellList.length - 1; j >= 0; j--) 
+				{
+					var cell:Cell = this.cellList[j];
+					cell.index = this.curPageIndex - ((this.cellList.length - 1) - j);
+					if (this._isHorizontal)
+						cell.x = cell.index * this.viewWidth;
+					else
+						cell.y = cell.index * this.viewHeight;
+				}
 			}
-			trace("新curPageIndex", this.curPageIndex);
-
+			
 			if (newTotalPageCount <= 1)
 			{
 				prevX = 0;
@@ -425,6 +407,16 @@ public class PageView extends ScrollView
 		this.content.y = prevY;
 		//更新页数
 		this.updatePages(count);
+		if (this._isHorizontal)
+		{
+			if (this.content.width > 0 && this.content.x < this.viewWidth - this.content.width)
+				this.content.x = this.viewWidth - this.content.width;
+		}
+		else
+		{
+			if (this.content.height > 0 && this.content.y < this.viewHeight - this.content.height)
+				this.content.y = this.viewHeight - this.content.height;
+		}
 	}
 	
 	override public function get isHorizontal():Boolean{ return super.isHorizontal; }
