@@ -17,7 +17,7 @@ public class PageView extends ScrollView
 	private var dspRows:int;//一屏显示几行
 	private var dspColumns:int;//一屏显示几列
 	private var count:int;//数据总数量
-	private var totalPageCount:int; //总页数
+	private var _totalPageCount:int; //总页数
 	private var showPageCount:int; //可显示的总页数
 	private var cellList:Array;
 	//一行或一列的显示数量
@@ -69,13 +69,13 @@ public class PageView extends ScrollView
 	private function updatePages(count:int):void
 	{
 		this.count = count;
-		this.totalPageCount = Math.ceil(this.count / (this.dspColumns * this.dspRows));
+		this._totalPageCount = Math.ceil(this.count / (this.dspColumns * this.dspRows));
 		this.showPageCount = MAX_SHOW_PAGE_COUNT;
-		if (this.totalPageCount < this.showPageCount) this.showPageCount = this.totalPageCount;
+		if (this._totalPageCount < this.showPageCount) this.showPageCount = this._totalPageCount;
 		if (!this._isHorizontal)
-			this.setContentSize(this.viewWidth, this.viewHeight * this.totalPageCount);
+			this.setContentSize(this.viewWidth, this.viewHeight * this._totalPageCount);
 		else
-			this.setContentSize(this.viewWidth * this.totalPageCount, this.viewHeight);
+			this.setContentSize(this.viewWidth * this._totalPageCount, this.viewHeight);
 	}
 	
 	/**
@@ -136,7 +136,7 @@ public class PageView extends ScrollView
 		{
 			var cell:Cell = this.cellList[i];
 			var index:int = cell.index * this.dspColumns * this.dspRows;
-			var isLastPage:Boolean = cell.index == this.totalPageCount - 1;
+			var isLastPage:Boolean = cell.index == this._totalPageCount - 1;
 			for (var j:int = 0; j < this.dspRows; j++) 
 			{
 				for (var k:int = 0; k < this.dspColumns; k++) 
@@ -180,17 +180,17 @@ public class PageView extends ScrollView
 		var cell:Cell;
 		if (this._isHorizontal)
 		{
-			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth / 2 && this.curPageIndex < this.totalPageCount - 1)
+			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth / 2 && this.curPageIndex < this._totalPageCount - 1)
 			{
 				//下一页
 				this.curPageIndex++;
-				this.updatePageCell.run();
+				if (this.updatePageCell) this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
-					this.curPageIndex < this.totalPageCount - 1 &&
-					this.showPageCount < this.totalPageCount)
+					this.curPageIndex < this._totalPageCount - 1 &&
+					this.showPageCount < this._totalPageCount)
 				{
 					//交换cell
 					cell = this.cellList.shift();
@@ -203,13 +203,13 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
-				this.updatePageCell.run();
+				if (this.updatePageCell) this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
 				if (this.curPageIndex > 0 && 
-					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
-					this.showPageCount < this.totalPageCount)
+					this.curPageIndex <= this._totalPageCount - this.showPageCount && 
+					this.showPageCount < this._totalPageCount)
 				{
 					//交换cell
 					cell = this.cellList.pop();
@@ -228,17 +228,17 @@ public class PageView extends ScrollView
 		}
 		else
 		{
-			if (this.content.y + this.viewHeight * this.curPageIndex <= -this.viewHeight / 2 && this.curPageIndex < this.totalPageCount - 1)
+			if (this.content.y + this.viewHeight * this.curPageIndex <= -this.viewHeight / 2 && this.curPageIndex < this._totalPageCount - 1)
 			{
 				//下一页
 				this.curPageIndex++;
-				this.updatePageCell.run();
+				if (this.updatePageCell) this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
 				if (this.curPageIndex >= this.showPageCount - 1 && 
-					this.curPageIndex < this.totalPageCount - 1 &&
-					this.showPageCount < this.totalPageCount)
+					this.curPageIndex < this._totalPageCount - 1 &&
+					this.showPageCount < this._totalPageCount)
 				{
 					//交换cell
 					cell = this.cellList.shift();
@@ -251,13 +251,13 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
-				this.updatePageCell.run();
+				if (this.updatePageCell) this.updatePageCell.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
 				if (this.curPageIndex > 0 && 
-					this.curPageIndex <= this.totalPageCount - this.showPageCount && 
-					this.showPageCount < this.totalPageCount)
+					this.curPageIndex <= this._totalPageCount - this.showPageCount && 
+					this.showPageCount < this._totalPageCount)
 				{
 					//交换cell
 					cell = this.cellList.pop();
@@ -349,7 +349,7 @@ public class PageView extends ScrollView
 		if (diffCount > 0)
 		{
 			//增加
-			var addPage:int = newShowPageCount - this.totalPageCount;
+			var addPage:int = newShowPageCount - this._totalPageCount;
 			if (addPage < 0) addPage = 0; //新的一屏行数与总行数相减
 			for (var i:int = 0; i < addPage; i++)
 			{
@@ -357,8 +357,8 @@ public class PageView extends ScrollView
 				this.createOnePageCell(lineIndex, this._isHorizontal);
 			}
 			
-			if (this.curPageIndex >= this.totalPageCount - 1 && 
-				newTotalPageCount > this.totalPageCount && 
+			if (this.curPageIndex >= this._totalPageCount - 1 && 
+				newTotalPageCount > this._totalPageCount && 
 				addPage == 0)
 			{
 				//如果当前是最后一页，则使用page循环来代替增加新的一页
@@ -417,6 +417,66 @@ public class PageView extends ScrollView
 			if (this.content.height > 0 && this.content.y < this.viewHeight - this.content.height)
 				this.content.y = this.viewHeight - this.content.height;
 		}
+		if (this.updatePageCell) this.updatePageCell.run();
+	}
+	
+	/**
+	 * 根据cell的索引跳转页数
+	 * @param	cellIndex	cell的索引
+	 */
+	public function gotoPageByIndex(cellIndex:int):void
+	{
+		
+	}
+	
+	/**
+	 * 根据页数跳转
+	 * @param	pageIndex	页数索引
+	 */
+	public function gotoPage(pageIndex:int):void
+	{
+		if (pageIndex < 0 || pageIndex > this._totalPageCount - 1) return;
+		this.curPageIndex = pageIndex;
+		//起始索引位置偏移
+		var startIndexOffset:int = 0;
+		if (this.curPageIndex == 0 || this._totalPageCount == 0)
+		{
+			//第一个位置
+			this.content.x = 0;
+			this.content.y = 0;
+			startIndexOffset = 0;
+		}
+		else if (this.curPageIndex == this._totalPageCount - 1)
+		{
+			//最后一个位置
+			if (this._isHorizontal)
+				this.content.x = this.viewWidth - this.content.width;
+			else
+				this.content.y = this.viewHeight - this.content.height;
+			startIndexOffset = -2;
+			if (this._totalPageCount < MAX_SHOW_PAGE_COUNT) startIndexOffset += MAX_SHOW_PAGE_COUNT - this._totalPageCount;
+		}
+		else
+		{
+			//中间位置
+			if (this._isHorizontal)
+				this.content.x = -this.viewWidth * this.curPageIndex;
+			else
+				this.content.y = -this.viewHeight * this.curPageIndex;
+			startIndexOffset = -1;
+		}
+		//重新设置3页cell
+		for (var i:int = 0; i < this.cellList.length; i++) 
+		{
+			var cell:Cell = this.cellList[i];
+			cell.index = this.curPageIndex + startIndexOffset;
+			startIndexOffset++;
+			if (this._isHorizontal)
+				cell.x = cell.index * this.viewWidth;
+			else
+				cell.y = cell.index * this.viewHeight;
+		}
+		if (this.updatePageCell) this.updatePageCell.run();
 	}
 	
 	override public function get isHorizontal():Boolean{ return super.isHorizontal; }
@@ -427,5 +487,7 @@ public class PageView extends ScrollView
 		this.updatePages(count);
 		this.createCell();
 	}
+	
+	public function get totalPageCount():int {return _totalPageCount; }
 }
 }

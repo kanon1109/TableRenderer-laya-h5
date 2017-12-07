@@ -70,7 +70,7 @@ public class Test
 		this.pageView.x = 100;
 		this.pageView.y = 50;
 		this.pageView.isShowDebug = true;
-		this.pageView.isHorizontal = false;
+		this.pageView.isHorizontal = true;
 		this.pageView.updateTableCell = new Handler(this, updateTableCellHandler);
 		this.pageView.updatePageCell = new Handler(this, updatePageCellHandler);
 		Laya.stage.addChild(this.pageView);
@@ -170,11 +170,19 @@ public class Test
 	
 	private function gotoBtnClickHandler():void 
 	{
-		var cellIndex:int = Random.randint(0, this.count - 1);
-		//cellIndex = this.count - 1;
-		//cellIndex = 22;
-		this.label.text = "数量:" + this.count + " cellIndex:" + (cellIndex + 1);
-		if (this.tableView) this.tableView.scrollToIndex(cellIndex);
+		if (this.tableView)
+		{
+			var cellIndex:int = Random.randint(0, this.count - 1);
+			trace("cellIndex", cellIndex);
+			this.label.text = "数量:" + this.count + " cellIndex:" + (cellIndex + 1);
+			this.tableView.scrollToIndex(cellIndex);
+		}
+		if (this.pageView) 
+		{
+			var pageIndex:int = Random.randint(0, this.pageView.totalPageCount - 1);
+			this.label.text = "页数:" + pageIndex;
+			this.pageView.gotoPage(pageIndex);
+		}
 		
 	}
 	
