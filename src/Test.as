@@ -182,6 +182,10 @@ public class Test
 			var pageIndex:int = Random.randint(0, this.pageView.totalPageCount - 1);
 			this.label.text = "页数:" + pageIndex;
 			this.pageView.gotoPage(pageIndex);
+			
+			//var cellIndex:int = Random.randint(0, this.count - 1);
+			//this.label.text = "cellIndex:" + cellIndex;
+			//this.pageView.gotoPageByIndex(cellIndex);
 		}
 		
 	}

@@ -20,8 +20,6 @@ public class PageView extends ScrollView
 	private var _totalPageCount:int; //总页数
 	private var showPageCount:int; //可显示的总页数
 	private var cellList:Array;
-	//一行或一列的显示数量
-	private var oneLineCellCount:int = 0;
 	//总的可显示页数
 	private static const MAX_SHOW_PAGE_COUNT:int = 3;
 	public var curPageIndex:int = 0;
@@ -426,7 +424,10 @@ public class PageView extends ScrollView
 	 */
 	public function gotoPageByIndex(cellIndex:int):void
 	{
-		
+		if (cellIndex < 0) cellIndex = 0;
+		else if (cellIndex > this.count - 1) cellIndex = this.count - 1;
+		var pageIndex:int = Math.ceil((cellIndex + 1) / (this.dspColumns * this.dspRows)) - 1;
+		this.gotoPage(pageIndex);
 	}
 	
 	/**
