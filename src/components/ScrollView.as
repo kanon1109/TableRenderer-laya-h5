@@ -324,6 +324,25 @@ public class ScrollView extends Sprite
 		this.updatePos();
 	}
 	//------------------------------
+	
+	public function destroySelf():void
+	{
+		if (this.content)
+		{
+			this.content.removeSelf();
+			this.content = null;
+		}
+		
+		this.off(Event.MOUSE_DOWN, this, contentMouseDownHandler);
+		this.off(Event.MOUSE_UP, this, contentMouseUpHandler);
+		Laya.stage.off(Event.MOUSE_UP, this, contentMouseUpHandler);
+		Laya.stage.off(Event.MOUSE_OUT, this, contentMouseUpHandler);
+		this.clearTimer(this, loopHandler);
+		
+		this.removeTween();
+		this.destroy();
+		this.removeSelf();
+	}
 
 }
 }

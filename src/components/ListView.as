@@ -98,9 +98,20 @@ public class ListView extends ScrollView
 		for (var i:int = count - 1; i >= 0; --i)
 		{
 			var node:Sprite = this.contentList[i];
+			node.destroy();
 			node.removeSelf();
 			this.contentList.splice(i, 1);
 		}
+	}
+	
+	/**
+	 * 销毁
+	 */
+	override public function destroySelf():void
+	{
+		this.removeAllChild();
+		this.contentList = null;
+		super.destroySelf();
 	}
 }
 }

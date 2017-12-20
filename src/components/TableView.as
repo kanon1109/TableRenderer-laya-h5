@@ -69,8 +69,10 @@ public class TableView extends ScrollView
 			this.oneLineCellCount = this.dspRows;
 		}
 		
-		trace("行:", this.dspRows, "列:", this.dspColumns);
-		trace("oneLineCellCount:", this.oneLineCellCount);
+		if (this.dspColumns < 1) this.dspColumns = 1;
+		if (this.dspRows < 1) this.dspRows = 1;
+		//trace("行:", this.dspRows, "列:", this.dspColumns);
+		//trace("oneLineCellCount:", this.oneLineCellCount);
 	}
 	
 	/**
@@ -300,7 +302,11 @@ public class TableView extends ScrollView
 		for (var i:int = count - 1; i >= 0; --i) 
 		{
 			var cell:Cell = this.cellList[i];
-			if(cell) cell.removeSelf();
+			if (cell) 
+			{
+				cell.destroy();
+				cell.removeSelf();
+			}
 			this.cellList.splice(i, 1);
 		}
 	}
@@ -592,5 +598,16 @@ public class TableView extends ScrollView
 		this.updateCount(count);
 		this.createCell();
 	}
+	
+	/**
+	 * 销毁
+	 */
+	override public function destroySelf():void
+	{
+		this.removeAllCell();
+		this.updateTableCell = null;
+		super.destroySelf();
+	}
+
 }
 }
