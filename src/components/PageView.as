@@ -1,6 +1,7 @@
-package components 
+package components
 {
-import laya.ui.Label;
+import laya.events.Event;
+import laya.maths.Point;
 import laya.utils.Ease;
 import laya.utils.Handler;
 import laya.utils.Tween;
@@ -22,10 +23,17 @@ public class PageView extends ScrollView
 	private var cellList:Array;
 	//总的可显示页数
 	private static const MAX_SHOW_PAGE_COUNT:int = 3;
+	//按下的位置
+	private var mouseDownPos:Point;
+	//点击的最小距离
+	private const clickMinDis:Number = 2;
 	//当前翻页的页面索引
 	public var curPageIndex:int = 0;
-	public var updateTableCell:Handler;
-	public var updatePageCell:Handler;
+	//滚动回调
+	public var updateTableCellHandler:Handler;
+	public var updatePageCellHandler:Handler;
+	//cell点击回调
+	public var onCellClickHandler:Handler;
 	public function PageView() 
 	{
 		super();
@@ -39,6 +47,7 @@ public class PageView extends ScrollView
 		this._isHorizontal = isHorizontal;
 		this.itemWidth = itemWidth;
 		this.itemHeight = itemHeight;
+		this.mouseDownPos = new Point();
 		this.updateRowsAndColums();
 		this.updatePages(count);
 		this.createCell();
@@ -118,11 +127,29 @@ public class PageView extends ScrollView
 				c.row = j;
 				c.column = k;
 				c.name = "c" + j + "_" + k; 
+				c.on(Event.MOUSE_DOWN, this, cellMouseDownHandler);
+				c.on(Event.MOUSE_UP, this, cellMouseUpHandler);
 				cell.addChild(c);
 			}
 		}
 		this.content.addChild(cell);
 		this.cellList.push(cell);
+	}
+	
+	private function cellMouseUpHandler(event:Event):void 
+	{
+		if (this.mouseDownPos.distance(event.stageX, event.stageY) <= this.clickMinDis)
+		{
+			var cell:Cell = event.currentTarget as Cell;
+			if (this.onCellClickHandler)
+				this.onCellClickHandler.runWith(cell);
+		}
+	}
+	
+	private function cellMouseDownHandler(event:Event):void 
+	{
+		this.mouseDownPos.x = event.stageX;
+		this.mouseDownPos.y = event.stageY;
 	}
 	
 	/**
@@ -148,8 +175,8 @@ public class PageView extends ScrollView
 					else c.visible = true;
 					index++;
 					//最后一行或一列
-					if (this.updateTableCell && c.visible) 
-						this.updateTableCell.runWith(c);
+					if (this.updateTableCellHandler && c.visible) 
+						this.updateTableCellHandler.runWith(c);
 				}
 			}
 		}
@@ -167,7 +194,7 @@ public class PageView extends ScrollView
 			if (this.content.x + this.viewWidth * this.curPageIndex <= -this.viewWidth && this.curPageIndex < this._totalPageCount - 1)
 			{
 				this.curPageIndex++;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				if (this.curPageIndex >= this.showPageCount - 1 && 
@@ -184,7 +211,7 @@ public class PageView extends ScrollView
 			else if (this.content.x + this.viewWidth * this.curPageIndex >= this.viewWidth && this.curPageIndex > 0)
 			{
 				this.curPageIndex--;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				if (this.curPageIndex > 0 && 
@@ -204,7 +231,7 @@ public class PageView extends ScrollView
 			if (this.content.y + this.viewHeight * this.curPageIndex <= -this.viewHeight && this.curPageIndex < this._totalPageCount - 1)
 			{
 				this.curPageIndex++;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				if (this.curPageIndex >= this.showPageCount - 1 && 
@@ -221,7 +248,7 @@ public class PageView extends ScrollView
 			else if (this.content.y + this.viewHeight * this.curPageIndex >= this.viewHeight && this.curPageIndex > 0)
 			{
 				this.curPageIndex--;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				if (this.curPageIndex > 0 && 
@@ -270,7 +297,7 @@ public class PageView extends ScrollView
 			{
 				//下一页
 				this.curPageIndex++;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -289,7 +316,7 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -309,7 +336,7 @@ public class PageView extends ScrollView
 				//弹回
 				this.speed = 0;
 				if (!this.tween) 
-					this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCell);
+					this.tween = Tween.to(this.content, { x : -this.viewWidth * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCellHandler);
 			}
 		}
 		else
@@ -318,7 +345,7 @@ public class PageView extends ScrollView
 			{
 				//下一页
 				this.curPageIndex++;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -337,7 +364,7 @@ public class PageView extends ScrollView
 			{
 				//上一页
 				this.curPageIndex--;
-				if (this.updatePageCell) this.updatePageCell.run();
+				if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 				this.removeTween();
 				this.speed = 0;
 				this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut);
@@ -357,7 +384,7 @@ public class PageView extends ScrollView
 				//弹回
 				this.speed = 0;
 				if (!this.tween) 
-					this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCell);
+					this.tween = Tween.to(this.content, { y : -this.viewHeight * this.curPageIndex }, this.bounceDuration, Ease.circOut, this.updatePageCellHandler);
 			}
 		}
 	}
@@ -466,6 +493,7 @@ public class PageView extends ScrollView
 			for (var i:int = 0; i < reducePage; i++)
 			{
 				var cell:Cell = this.cellList.pop();
+				cell.destroy();
 				cell.removeSelf();
 			}
 			
@@ -504,8 +532,8 @@ public class PageView extends ScrollView
 			if (this.content.height > 0 && this.content.y < this.viewHeight - this.content.height)
 				this.content.y = this.viewHeight - this.content.height;
 		}
-		if (this.updatePageCell) 
-			this.updatePageCell.run();
+		if (this.updatePageCellHandler) 
+			this.updatePageCellHandler.run();
 	}
 	
 	/**
@@ -567,7 +595,7 @@ public class PageView extends ScrollView
 			else
 				cell.y = cell.index * this.viewHeight;
 		}
-		if (this.updatePageCell) this.updatePageCell.run();
+		if (this.updatePageCellHandler) this.updatePageCellHandler.run();
 	}
 	
 	override public function get isHorizontal():Boolean{ return super.isHorizontal; }
@@ -588,8 +616,9 @@ public class PageView extends ScrollView
 	override public function destroySelf():void
 	{
 		this.removeAllCell();
-		this.updateTableCell = null;
-		this.updatePageCell = null;
+		this.updateTableCellHandler = null;
+		this.updatePageCellHandler = null;
+		this.onCellClickHandler = null;
 		super.destroySelf();
 	}
 }

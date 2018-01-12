@@ -1,6 +1,7 @@
 package components 
 {
-import laya.display.Sprite;
+import laya.events.Event;
+import laya.maths.Point;
 import laya.utils.Handler;
 /**
  * ...无限数量虚拟list或table
@@ -31,7 +32,14 @@ public class TableView extends ScrollView
 	private var lastLineCellCount:int = 0;
 	//一行或一列的显示数量
 	private var oneLineCellCount:int = 0;
-	public var updateTableCell:Handler;
+	//按下的位置
+	private var mouseDownPos:Point;
+	//点击的最小距离
+	private const clickMinDis:Number = 2;
+	//滚动回调
+	public var updateTableCellHandler:Handler;
+	//cell点击回调
+	public var onCellClickHandler:Handler;
 	public function TableView() 
 	{
 		super();
@@ -46,6 +54,7 @@ public class TableView extends ScrollView
 		this.itemWidth = itemWidth;
 		this.itemHeight = itemHeight;
 		this.cellList = [];
+		this.mouseDownPos = new Point();
 		this.updateRowsAndColums();
 		this.updateCount(count);
 		this.createCell();
@@ -130,6 +139,8 @@ public class TableView extends ScrollView
 				columnsCell.column = j;
 				columnsCell.name = "cell" + j;
 				columnsCell.index = (cell.row * this.dspColumns) + columnsCell.column;
+				columnsCell.on(Event.MOUSE_DOWN, this, cellMouseDownHandler);
+				columnsCell.on(Event.MOUSE_UP, this, cellMouseUpHandler);
 				cell.addChild(columnsCell);
 			}
 		}
@@ -153,9 +164,27 @@ public class TableView extends ScrollView
 				rowsCell.row = j;
 				rowsCell.name = "cell" + j;
 				rowsCell.index = (cell.column * this.dspColumns) + rowsCell.row;
+				rowsCell.on(Event.MOUSE_DOWN, this, cellMouseDownHandler);
+				rowsCell.on(Event.MOUSE_UP, this, cellMouseUpHandler);
 				cell.addChild(rowsCell);
 			}
 		}
+	}
+	
+	private function cellMouseUpHandler(event:Event):void 
+	{
+		if (this.mouseDownPos.distance(event.stageX, event.stageY) <= this.clickMinDis)
+		{
+			var cell:Cell = event.currentTarget as Cell;
+			if (this.onCellClickHandler)
+				this.onCellClickHandler.runWith(cell);
+		}
+	}
+	
+	private function cellMouseDownHandler(event:Event):void 
+	{
+		this.mouseDownPos.x = event.stageX;
+		this.mouseDownPos.y = event.stageY;
 	}
 	
 	/**
@@ -286,8 +315,8 @@ public class TableView extends ScrollView
 					c.index = (cell.column * this.dspRows) + c.row;
 				}
 				//最后一行或一列
-				if (this.updateTableCell && c.visible) 
-					this.updateTableCell.runWith(c);
+				if (this.updateTableCellHandler && c.visible) 
+					this.updateTableCellHandler.runWith(c);
 			}
 		}
 	}
@@ -306,6 +335,8 @@ public class TableView extends ScrollView
 			{
 				cell.destroy();
 				cell.removeSelf();
+				
+				
 			}
 			this.cellList.splice(i, 1);
 		}
@@ -344,9 +375,6 @@ public class TableView extends ScrollView
 		{
 			//增加
 			var addLine:int = newShowLineCount - this.totalLineCount;
-			trace("newShowLineCount", newShowLineCount);
-			trace("totalLineCount", totalLineCount);
-			trace("addLine", addLine);
 			if (addLine < 0) addLine = 0; //新的一屏行数与总行数相减
 			for (var i:int = 0; i < addLine; i++)
 			{
@@ -386,6 +414,7 @@ public class TableView extends ScrollView
 					}
 					else
 					{
+						cell.destroy();
 						cell.removeSelf();
 					}
 				}
@@ -543,8 +572,6 @@ public class TableView extends ScrollView
 			}
 			startIndex++;
 		}
-		trace("startIndex", startIndex);
-		trace("curIndex", curIndex);
 		this.updateCell();
 		this.debugDrawContentBound();
 	}
@@ -605,7 +632,8 @@ public class TableView extends ScrollView
 	override public function destroySelf():void
 	{
 		this.removeAllCell();
-		this.updateTableCell = null;
+		this.onCellClickHandler = null;
+		this.updateTableCellHandler = null;
 		super.destroySelf();
 	}
 
