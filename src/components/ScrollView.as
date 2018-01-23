@@ -29,7 +29,7 @@ public class ScrollView extends Sprite
 	//动画
 	protected var tween:Tween;
 	//最大速度
-	protected const SPEED_MAX:int = 40;
+	protected const SPEED_MAX:int = 20;
 	//回弹时间
 	protected var bounceDuration:int;
 	//速度
@@ -227,14 +227,14 @@ public class ScrollView extends Sprite
 		if (this.isTouched)
 		{
 			if (!this._isHorizontal)
-				this.speed = MouseManager.instance.mouseY - this.prevMousePos.y;
+				this.speed = this.mouseY - this.prevMousePos.y;
 			else
-				this.speed = MouseManager.instance.mouseX - this.prevMousePos.x;
+				this.speed = this.mouseX - this.prevMousePos.x;
 		}
 		if (this.speed > SPEED_MAX) this.speed = SPEED_MAX;
 		else if (this.speed < -SPEED_MAX) this.speed = -SPEED_MAX;
-		this.prevMousePos.x = MouseManager.instance.mouseX;
-		this.prevMousePos.y = MouseManager.instance.mouseY;
+		this.prevMousePos.x = this.mouseX;
+		this.prevMousePos.y = this.mouseY;
 		this.speed *= this.friction;
 		if (Math.abs(this.speed) < .1) this.speed = 0;
 	}
@@ -250,7 +250,7 @@ public class ScrollView extends Sprite
 		{
 			if (!this._isHorizontal)
 			{
-				this.content.y = this.contentPos.y + (MouseManager.instance.mouseY - this.touchPos.y);
+				this.content.y = this.contentPos.y + (this.mouseY - this.touchPos.y);
 				if (!this.isBounce)
 				{
 					if (this.content.y > 0) this.content.y = 0;
@@ -259,7 +259,7 @@ public class ScrollView extends Sprite
 			}
 			else
 			{
-				this.content.x = this.contentPos.x + (MouseManager.instance.mouseX - this.touchPos.x);
+				this.content.x = this.contentPos.x + (this.mouseX - this.touchPos.x);
 				if (!this.isBounce)
 				{
 					if (this.content.x > 0) this.content.x = 0;
@@ -298,12 +298,12 @@ public class ScrollView extends Sprite
 	}
 		
 	//------点击事件--------
-	private function contentMouseDownHandler():void 
+	private function contentMouseDownHandler(event:Event):void 
 	{
 		this.isTouched = true;
 		this.removeTween();
-		this.touchPos.x = MouseManager.instance.mouseX;
-		this.touchPos.y = MouseManager.instance.mouseY;
+		this.touchPos.x = this.mouseX;
+		this.touchPos.y = this.mouseY;
 		this.prevMousePos.x = this.touchPos.x;
 		this.prevMousePos.y = this.touchPos.y;
 		this.contentPos.x = this.content.x;
