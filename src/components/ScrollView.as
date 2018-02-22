@@ -24,8 +24,6 @@ public class ScrollView extends Sprite
 	//点击坐标
 	protected var touchPos:Point;
 	protected var contentPos:Point;
-	//释放后是否有弹性效果
-	protected var isBounce:Boolean;
 	//动画
 	protected var tween:Tween;
 	//最大速度
@@ -40,6 +38,9 @@ public class ScrollView extends Sprite
 	protected var prevMousePos:Point;
 	//是否显示调试内容框
 	protected var _isShowDebug:Boolean;
+	
+	//释放后是否有弹性效果
+	public var isBounce:Boolean;
 	public function ScrollView() 
 	{
 		this.initData();
@@ -246,33 +247,27 @@ public class ScrollView extends Sprite
 	{
 		if (this.content.height == 0 && !this._isHorizontal) return;
 		if (this.content.width == 0 && this._isHorizontal) return;
-		if (this.isTouched)
-		{
-			if (!this._isHorizontal)
+		if (!this._isHorizontal)
+		{				
+			this.content.y += this.speed;
+			if (!this.isBounce)
 			{
-				this.content.y = this.contentPos.y + (this.mouseY - this.touchPos.y);
-				if (!this.isBounce)
-				{
-					if (this.content.y > 0) this.content.y = 0;
-					else if (this.content.y < this.viewHeight - this.content.height) this.content.y = this.viewHeight - this.content.height;
-				}
-			}
-			else
-			{
-				this.content.x = this.contentPos.x + (this.mouseX - this.touchPos.x);
-				if (!this.isBounce)
-				{
-					if (this.content.x > 0) this.content.x = 0;
-					else if (this.content.x < this.viewWidth - this.content.width) this.content.x = this.viewWidth - this.content.width;
-				}
+				if (this.content.y > 0)
+					this.content.y = 0;
+				else if (this.content.y < this.viewHeight - this.content.height) 
+					this.content.y = this.viewHeight - this.content.height;
 			}
 		}
 		else
 		{
-			if (!this._isHorizontal)
-				this.content.y += this.speed;
-			else
-				this.content.x += this.speed;
+			this.content.x += this.speed;
+			if (!this.isBounce)
+			{
+				if (this.content.x > 0) 
+					this.content.x = 0;
+				else if (this.content.x < this.viewWidth - this.content.width) 
+					this.content.x = this.viewWidth - this.content.width;
+			}
 		}
 	}
 	
