@@ -257,6 +257,13 @@ public class ScrollView extends Sprite
 				else if (this.content.y < this.viewHeight - this.content.height) 
 					this.content.y = this.viewHeight - this.content.height;
 			}
+			else
+			{
+				if (this.content.y > 0)
+					this.content.y -= this.speed * (this.content.y / this.viewHeight);
+				else if (this.content.y < this.viewHeight - this.content.height)
+					this.content.y += this.speed * ((this.content.y + this.content.height - this.viewHeight) / this.viewHeight);
+			}
 		}
 		else
 		{
@@ -267,6 +274,13 @@ public class ScrollView extends Sprite
 					this.content.x = 0;
 				else if (this.content.x < this.viewWidth - this.content.width) 
 					this.content.x = this.viewWidth - this.content.width;
+			}
+			else
+			{
+				if (this.content.x > 0)
+					this.content.x -= this.speed * (this.content.x / this.viewWidth);
+				else if (this.content.x < this.viewWidth - this.content.width)
+					this.content.x += this.speed * ((this.content.x + this.content.width - this.viewWidth) / this.viewWidth);
 			}
 		}
 	}

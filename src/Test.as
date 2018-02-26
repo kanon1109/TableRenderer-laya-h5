@@ -56,24 +56,25 @@ public class Test
 		this.scroll.isHorizontal = true;
 		//Laya.stage.addChild(this.scroll);
 		
-		//this.tableView = new TableView();
-		//this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 500);
-		//this.tableView.x = 100;
-		//this.tableView.y = 50;
-		//this.tableView.isShowDebug = true;
-		//this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		//this.tableView.isHorizontal = true;
-		//Laya.stage.addChild(this.tableView);
+		this.tableView = new TableView();
+		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
+		this.tableView.x = 100;
+		this.tableView.y = 50;
+		this.tableView.isShowDebug = true;
+		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
+		this.tableView.isHorizontal = true;
+		Laya.stage.addChild(this.tableView);
 
-		this.pageView = new PageView();
+		/*this.pageView = new PageView();
 		this.pageView.init(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.pageView.x = 100;
 		this.pageView.y = 50;
 		this.pageView.isShowDebug = true;
+		this.pageView.isBounce = false;
 		this.pageView.isHorizontal = true;
 		this.pageView.updateTableCell = new Handler(this, updateTableCellHandler);
 		this.pageView.updatePageCell = new Handler(this, updatePageCellHandler);
-		Laya.stage.addChild(this.pageView);
+		Laya.stage.addChild(this.pageView);*/
 
 		this.label = new Label();
 		this.label.color = "#FF0000";
