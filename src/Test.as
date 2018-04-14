@@ -5,6 +5,7 @@ import components.ListView;
 import components.PageView;
 import components.ScrollView;
 import components.TableView;
+import laya.debug.DebugPanel;
 import laya.display.Stage;
 import laya.events.Event;
 import laya.net.Loader;
@@ -34,11 +35,13 @@ public class Test
 		Laya.stage.scaleMode = Stage.SCALE_SHOWALL;
 		Laya.stage.screenMode = Stage.SCREEN_HORIZONTAL;
 		Laya.stage.bgColor = "#0F1312";
+		//DebugPanel.init()
 		
 		this.count = Random.randint(0, 130);
-		this.count = 0;
+		//this.count = 0;
 		this.updateData();
-		
+		trace("count", count)
+
 		//this.scrollList = new ListView();
 		//this.scrollList.setViewSize(200, 500);
 		//this.scrollList.gap = 10;
@@ -47,24 +50,23 @@ public class Test
 		//this.scrollList.isShowDebug = true;
 		//Laya.stage.addChild(this.scrollList);
 		//
-		this.scroll = new ScrollView();
-		this.scroll.setViewSize(200, 500);
-		this.scroll.setContentSize(200, 1800);
-		this.scroll.x = 900;
-		this.scroll.y = 50;
-		this.scroll.isShowDebug = true;
-		this.scroll.isHorizontal = true;
+		//this.scroll = new ScrollView();
+		//this.scroll.setViewSize(200, 500);
+		//this.scroll.setContentSize(200, 1800);
+		//this.scroll.x = 900;
+		//this.scroll.y = 50;
+		//this.scroll.isShowDebug = true;
+		//this.scroll.isHorizontal = true;
 		//Laya.stage.addChild(this.scroll);
 		
 		this.tableView = new TableView();
 		this.tableView.initTable(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.tableView.x = 100;
 		this.tableView.y = 50;
-		this.tableView.isShowDebug = true;
-		this.tableView.updateTableCell = new Handler(this, updateTableCellHandler);
-		this.tableView.isHorizontal = true;
+		//this.tableView.isShowDebug = false;
+		this.tableView.updateTableCellHandler = new Handler(this, updateTableCellHandler);
+		//this.tableView.isHorizontal = false;
 		Laya.stage.addChild(this.tableView);
-
 		/*this.pageView = new PageView();
 		this.pageView.init(this.itemList.length, false, 700, 500, 124 + 10, 124 + 10);
 		this.pageView.x = 100;
@@ -72,8 +74,8 @@ public class Test
 		this.pageView.isShowDebug = true;
 		this.pageView.isBounce = false;
 		this.pageView.isHorizontal = true;
-		this.pageView.updateTableCell = new Handler(this, updateTableCellHandler);
-		this.pageView.updatePageCell = new Handler(this, updatePageCellHandler);
+		this.pageView.updateTableCellHandler = new Handler(this, updateTableCellHandler);
+		this.pageView.updatePageCellHandler = new Handler(this, updatePageCellHandler);
 		Laya.stage.addChild(this.pageView);*/
 
 		this.label = new Label();
@@ -115,6 +117,8 @@ public class Test
 			label.name = "txt";
 			label.fontSize = 24;
 			label.color = "#FF0000";
+			label.x = cell.width / 2
+			label.y = cell.height / 2
 			cell.addChild(label);
 		}
 		else
@@ -122,8 +126,8 @@ public class Test
 			label = cell.getChildByName("txt") as Label;
 		}
 		var itemVo:ItemVo = this.itemList[cell.index];
-		//label.text = "r: " + cell.row + ", i" + (cell.index + 1);
-		//label.text = "r: " + cell.column + ", i" + (cell.index + 1);
+		label.text = "r: " + cell.row + ", i" + (cell.index + 1);
+		label.text = "r: " + cell.column + ", i" + (cell.index + 1);
 		label.text = cell.index.toString();
 	}
 	
@@ -147,7 +151,7 @@ public class Test
 		btn.on(Event.CLICK, this, gotoBtnClickHandler);
 		Laya.stage.addChild(btn);
 		
-		for (var i:int = 0; i < 15; i++) 
+		/*for (var i:int = 0; i < 15; i++) 
 		{
 			var img:Image = new Image("res/bg.png");
 			if (this.scrollList) this.scrollList.addToContent(img);
@@ -161,8 +165,8 @@ public class Test
 		img = new Image("res/bg.png");
 		img.x = 20;
 		img.y = 60;
-		if (this.scroll) this.scroll.addToContent(img);
-		
+		if (this.scroll) this.scroll.addToContent(img);*/
+
 		Laya.stage.on(Event.CLICK, this, clickHandler);
 		Laya.stage.on(Event.MOUSE_DOWN, this, stageMouseDownHandler);
 		Laya.stage.on(Event.MOUSE_UP, this, stageMouseUpHandler);
@@ -183,7 +187,6 @@ public class Test
 			var pageIndex:int = Random.randint(0, this.pageView.totalPageCount - 1);
 			this.label.text = "页数:" + pageIndex;
 			this.pageView.gotoPage(pageIndex);
-			
 			//var cellIndex:int = Random.randint(0, this.count - 1);
 			//this.label.text = "cellIndex:" + cellIndex;
 			//this.pageView.gotoPageByIndex(cellIndex);
@@ -199,7 +202,7 @@ public class Test
 		this.updateData();
 		if (this.tableView) 
 		{
-			this.tableView.isShowDebug = !this.tableView.isShowDebug;
+			//this.tableView.isShowDebug = !this.tableView.isShowDebug;
 			this.tableView.reloadData(this.itemList.length);
 		}
 		if (this.pageView) this.pageView.reloadData(this.itemList.length);
